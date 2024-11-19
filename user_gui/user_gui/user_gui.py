@@ -1,11 +1,11 @@
 import sys
 import threading
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QSpinBox
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QSpinBox, QHBoxLayout
 from PyQt5.QtCore import Qt
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
+from std_msgs.msg import String, Bool  # Import Bool for /belt topic
 
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
 
@@ -15,13 +15,22 @@ class SimpleOrderGUI(QWidget):
         self.node = node  # ROS2 node
         self.init_ui()
 
+        # Publisher for /order topic
         qos_order = QoSProfile(
             reliability=ReliabilityPolicy.RELIABLE,
             history=HistoryPolicy.KEEP_ALL,
             durability=DurabilityPolicy.TRANSIENT_LOCAL
         )
+        self.order_publisher = self.node.create_publisher(String, '/order', qos_profile=qos_order)
 
-        self.publisher = self.node.create_publisher(String, '/order', qos_profile=qos_order)
+        # Publisher for /belt topic
+        qos_belt = QoSProfile(
+            reliability=ReliabilityPolicy.RELIABLE,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10,
+            durability=DurabilityPolicy.VOLATILE
+        )
+        self.belt_publisher = self.node.create_publisher(Bool, '/belt', qos_profile=qos_belt)
 
     def init_ui(self):
         # Create main layout
@@ -64,15 +73,61 @@ class SimpleOrderGUI(QWidget):
         self.send_button.clicked.connect(self.send_order)
         self.send_button.setFixedSize(100, 40)
 
+        # Belt control buttons layout
+        belt_layout = QHBoxLayout()
+        belt_layout.setSpacing(20)
+
+        # On button
+        self.on_button = QPushButton('on')
+        self.on_button.clicked.connect(self.belt_on)
+        self.on_button.setFixedSize(80, 40)
+        self.on_button.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border-radius: 10px;
+                font-size: 16px;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+            QPushButton:pressed {
+                background-color: #3e8e41;
+            }
+        """)
+
+        # Off button
+        self.off_button = QPushButton('off')
+        self.off_button.clicked.connect(self.belt_off)
+        self.off_button.setFixedSize(80, 40)
+        self.off_button.setStyleSheet("""
+            QPushButton {
+                background-color: #f44336;
+                color: white;
+                border-radius: 10px;
+                font-size: 16px;
+            }
+            QPushButton:hover {
+                background-color: #da190b;
+            }
+            QPushButton:pressed {
+                background-color: #b71c1c;
+            }
+        """)
+
+        belt_layout.addWidget(self.on_button)
+        belt_layout.addWidget(self.off_button)
+
         # Add layouts to main layout
         main_layout.addLayout(red_layout)
         main_layout.addLayout(blue_layout)
         main_layout.addLayout(goto_layout)
         main_layout.addWidget(self.send_button, alignment=Qt.AlignCenter)
+        main_layout.addLayout(belt_layout)  # Add belt buttons below send button
 
         self.setLayout(main_layout)
         self.setWindowTitle('Order GUI')
-        self.setFixedSize(300, 400)
+        self.setFixedSize(300, 500)  # Increased height to accommodate new buttons
         self.show()
 
     def send_order(self):
@@ -82,8 +137,20 @@ class SimpleOrderGUI(QWidget):
         order_str = f'red_box:{red_value},blue_box:{blue_value},goto_goal:{goto_value}'
         msg = String()
         msg.data = order_str
-        self.publisher.publish(msg)
-        self.node.get_logger().info(f'Published: {order_str}')
+        self.order_publisher.publish(msg)
+        self.node.get_logger().info(f'Published to /order: {order_str}')
+
+    def belt_on(self):
+        msg = Bool()
+        msg.data = True
+        self.belt_publisher.publish(msg)
+        self.node.get_logger().info('Published to /belt: True')
+
+    def belt_off(self):
+        msg = Bool()
+        msg.data = False
+        self.belt_publisher.publish(msg)
+        self.node.get_logger().info('Published to /belt: False')
 
 def main(args=None):
     rclpy.init(args=args)

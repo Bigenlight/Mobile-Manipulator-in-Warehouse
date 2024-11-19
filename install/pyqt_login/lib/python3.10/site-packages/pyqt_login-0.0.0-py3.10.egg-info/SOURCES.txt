@@ -1,0 +1,17 @@
+package.xml
+setup.cfg
+setup.py
+../build/pyqt_login/pyqt_login.egg-info/PKG-INFO
+../build/pyqt_login/pyqt_login.egg-info/SOURCES.txt
+../build/pyqt_login/pyqt_login.egg-info/dependency_links.txt
+../build/pyqt_login/pyqt_login.egg-info/entry_points.txt
+../build/pyqt_login/pyqt_login.egg-info/requires.txt
+../build/pyqt_login/pyqt_login.egg-info/top_level.txt
+../build/pyqt_login/pyqt_login.egg-info/zip-safe
+pyqt_login/__init__.py
+pyqt_login/error_publisher.py
+pyqt_login/login_node.py
+resource/pyqt_login
+test/test_copyright.py
+test/test_flake8.py
+test/test_pep257.py

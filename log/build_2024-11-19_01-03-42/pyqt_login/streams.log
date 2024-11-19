@@ -1,0 +1,41 @@
+[1.127s] Invoking command in '/home/rokey/3_ws/src/pyqt_login': PYTHONPATH=/home/rokey/3_ws/src/build/pyqt_login/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/pyqt_login build --build-base /home/rokey/3_ws/src/build/pyqt_login/build install --record /home/rokey/3_ws/src/build/pyqt_login/install.log --single-version-externally-managed install_data
+[1.401s] running egg_info
+[1.401s] creating ../build/pyqt_login/pyqt_login.egg-info
+[1.401s] writing ../build/pyqt_login/pyqt_login.egg-info/PKG-INFO
+[1.402s] writing dependency_links to ../build/pyqt_login/pyqt_login.egg-info/dependency_links.txt
+[1.402s] writing entry points to ../build/pyqt_login/pyqt_login.egg-info/entry_points.txt
+[1.402s] writing requirements to ../build/pyqt_login/pyqt_login.egg-info/requires.txt
+[1.402s] writing top-level names to ../build/pyqt_login/pyqt_login.egg-info/top_level.txt
+[1.402s] writing manifest file '../build/pyqt_login/pyqt_login.egg-info/SOURCES.txt'
+[1.404s] reading manifest file '../build/pyqt_login/pyqt_login.egg-info/SOURCES.txt'
+[1.404s] writing manifest file '../build/pyqt_login/pyqt_login.egg-info/SOURCES.txt'
+[1.405s] running build
+[1.405s] running build_py
+[1.405s] creating /home/rokey/3_ws/src/build/pyqt_login/build
+[1.405s] creating /home/rokey/3_ws/src/build/pyqt_login/build/lib
+[1.405s] creating /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login
+[1.405s] copying pyqt_login/login_node.py -> /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login
+[1.405s] copying pyqt_login/__init__.py -> /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login
+[1.406s] copying pyqt_login/error_publisher.py -> /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login
+[1.406s] running install
+[1.406s] running install_lib
+[1.407s] creating /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login
+[1.407s] copying /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login/login_node.py -> /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login
+[1.407s] copying /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login/__init__.py -> /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login
+[1.409s] copying /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login/error_publisher.py -> /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login
+[1.409s] byte-compiling /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login/login_node.py to login_node.cpython-310.pyc
+[1.411s] byte-compiling /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login/__init__.py to __init__.cpython-310.pyc
+[1.412s] byte-compiling /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login/error_publisher.py to error_publisher.cpython-310.pyc
+[1.412s] running install_data
+[1.412s] creating /home/rokey/3_ws/src/install/pyqt_login/share/ament_index
+[1.413s] creating /home/rokey/3_ws/src/install/pyqt_login/share/ament_index/resource_index
+[1.413s] creating /home/rokey/3_ws/src/install/pyqt_login/share/ament_index/resource_index/packages
+[1.413s] copying resource/pyqt_login -> /home/rokey/3_ws/src/install/pyqt_login/share/ament_index/resource_index/packages
+[1.414s] copying package.xml -> /home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login
+[1.414s] running install_egg_info
+[1.416s] Copying ../build/pyqt_login/pyqt_login.egg-info to /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login-0.0.0-py3.10.egg-info
+[1.417s] running install_scripts
+[1.438s] Installing error_publisher script to /home/rokey/3_ws/src/install/pyqt_login/lib/pyqt_login
+[1.438s] Installing login_node script to /home/rokey/3_ws/src/install/pyqt_login/lib/pyqt_login
+[1.438s] writing list of installed files to '/home/rokey/3_ws/src/build/pyqt_login/install.log'
+[1.491s] Invoked command in '/home/rokey/3_ws/src/pyqt_login' returned '0': PYTHONPATH=/home/rokey/3_ws/src/build/pyqt_login/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/pyqt_login build --build-base /home/rokey/3_ws/src/build/pyqt_login/build install --record /home/rokey/3_ws/src/build/pyqt_login/install.log --single-version-externally-managed install_data

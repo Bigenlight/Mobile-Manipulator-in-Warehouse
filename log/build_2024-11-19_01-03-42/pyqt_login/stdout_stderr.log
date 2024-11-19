@@ -1,0 +1,39 @@
+running egg_info
+creating ../build/pyqt_login/pyqt_login.egg-info
+writing ../build/pyqt_login/pyqt_login.egg-info/PKG-INFO
+writing dependency_links to ../build/pyqt_login/pyqt_login.egg-info/dependency_links.txt
+writing entry points to ../build/pyqt_login/pyqt_login.egg-info/entry_points.txt
+writing requirements to ../build/pyqt_login/pyqt_login.egg-info/requires.txt
+writing top-level names to ../build/pyqt_login/pyqt_login.egg-info/top_level.txt
+writing manifest file '../build/pyqt_login/pyqt_login.egg-info/SOURCES.txt'
+reading manifest file '../build/pyqt_login/pyqt_login.egg-info/SOURCES.txt'
+writing manifest file '../build/pyqt_login/pyqt_login.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/rokey/3_ws/src/build/pyqt_login/build
+creating /home/rokey/3_ws/src/build/pyqt_login/build/lib
+creating /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login
+copying pyqt_login/login_node.py -> /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login
+copying pyqt_login/__init__.py -> /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login
+copying pyqt_login/error_publisher.py -> /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login
+running install
+running install_lib
+creating /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login
+copying /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login/login_node.py -> /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login
+copying /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login/__init__.py -> /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login
+copying /home/rokey/3_ws/src/build/pyqt_login/build/lib/pyqt_login/error_publisher.py -> /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login
+byte-compiling /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login/login_node.py to login_node.cpython-310.pyc
+byte-compiling /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login/error_publisher.py to error_publisher.cpython-310.pyc
+running install_data
+creating /home/rokey/3_ws/src/install/pyqt_login/share/ament_index
+creating /home/rokey/3_ws/src/install/pyqt_login/share/ament_index/resource_index
+creating /home/rokey/3_ws/src/install/pyqt_login/share/ament_index/resource_index/packages
+copying resource/pyqt_login -> /home/rokey/3_ws/src/install/pyqt_login/share/ament_index/resource_index/packages
+copying package.xml -> /home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login
+running install_egg_info
+Copying ../build/pyqt_login/pyqt_login.egg-info to /home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages/pyqt_login-0.0.0-py3.10.egg-info
+running install_scripts
+Installing error_publisher script to /home/rokey/3_ws/src/install/pyqt_login/lib/pyqt_login
+Installing login_node script to /home/rokey/3_ws/src/install/pyqt_login/lib/pyqt_login
+writing list of installed files to '/home/rokey/3_ws/src/build/pyqt_login/install.log'

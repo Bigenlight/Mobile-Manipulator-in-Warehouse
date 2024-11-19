@@ -57,7 +57,6 @@ class LoginWindow(QWidget):
         self.app = app  # QApplication 인스턴스를 참조
         self.communicator = communicator
         self.communicator.error_signal.connect(self.show_error_popup)
-        self.main_window = None
         self.init_ui()
 
     def init_ui(self):
@@ -89,7 +88,7 @@ class LoginWindow(QWidget):
         password = self.input_password.text()
 
         # 간단한 예제로 사용자 이름과 비밀번호를 확인합니다.
-        if username == 'rokey' and password == 'rokey':
+        if username == 'admin' and password == 'password':
             QMessageBox.information(self, 'Login', 'Login Successful!')
             self.node.get_logger().info(f'User {username} logged in successfully.')
             self.open_main_window()
@@ -110,7 +109,6 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.node = node
         self.communicator = communicator
-        self.manipulation_publisher = None  # 퍼블리셔 초기화
         self.init_ui()
 
     def init_ui(self):
@@ -270,34 +268,34 @@ class MainWindow(QMainWindow):
 
     def play_job(self):
         QMessageBox.information(self, "Play", "작업을 시작합니다.")
-        self.publish_manipulation_command("play")  # "play" 메시지 발행
+        # ROS 2 작업 시작 코드 삽입
 
     def stop_job(self):
         QMessageBox.information(self, "Stop", "작업을 중지합니다.")
-        self.publish_manipulation_command("stop")  # "stop" 메시지 발행
+        # ROS 2 작업 중지 코드 삽입
 
     def pause_job(self):
         QMessageBox.information(self, "Pause", "작업을 일시 중지합니다.")
-        self.publish_manipulation_command("pause")  # "pause" 메시지 발행
+        # ROS 2 작업 일시 중지 코드 삽입
 
     def resume_job(self):
         QMessageBox.information(self, "Resume", "작업을 재개합니다.")
-        self.publish_manipulation_command("resume")  # "resume" 메시지 발행
+        # ROS 2 작업 재개 코드 삽입
 
     def reset_job(self):
         QMessageBox.information(self, "Reset", "작업을 초기화합니다.")
         self.job_time_label.setText("소요 시간: 0초")
         self.timer.stop()
         self.start_time = None
-        self.publish_manipulation_command("reset")  # "reset" 메시지 발행
+        # ROS 2 작업 초기화 코드 삽입
 
     def conveyor_on(self):
         QMessageBox.information(self, "Conveyor", "컨베이어를 켭니다.")
-        self.publish_manipulation_command("conveyor_on")  # "conveyor_on" 메시지 발행
+        # 컨베이어 On 코드 삽입
 
     def conveyor_off(self):
         QMessageBox.information(self, "Conveyor", "컨베이어를 끕니다.")
-        self.publish_manipulation_command("conveyor_off")  # "conveyor_off" 메시지 발행
+        # 컨베이어 Off 코드 삽입
 
     def closeEvent(self, event):
         """창이 닫힐 때 스레드를 종료"""
@@ -307,16 +305,6 @@ class MainWindow(QMainWindow):
     def update_image(self, qt_img):
         self.video_label.setPixmap(QPixmap.fromImage(qt_img).scaled(
             self.video_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
-
-    def publish_manipulation_command(self, command: str):
-        if self.manipulation_publisher is None:
-            self.node.get_logger().error("Manipulation publisher not initialized.")
-            QMessageBox.critical(self, "Error", "Manipulation publisher not initialized.")
-            return
-        msg = String()
-        msg.data = command
-        self.manipulation_publisher.publish(msg)
-        self.node.get_logger().info(f'Published "{command}" to /manipulation topic.')
 
 class ErrorSubscriber(Node):
     def __init__(self, email_config, communicator: Communicator):
@@ -376,11 +364,11 @@ def main(args=None):
 
     # 이메일 설정
     email_config = {
-        'smtp_server': 'smtp.gmail.com',
-        'smtp_port': 587,
-        'sender_email': 'kwilee0426@gmail.com',
-        'sender_password': 'dgnbwiqaizoekfvd',
-        'receiver_email': 'ssm06081@gmail.com',
+        'smtp_server': os.getenv('SMTP_SERVER', 'smtp.gmail.com'),       # SMTP 서버 주소
+        'smtp_port': int(os.getenv('SMTP_PORT', 587)),                  # SMTP 포트
+        'sender_email': os.getenv('SENDER_EMAIL'),                      # 발신자 이메일 주소
+        'sender_password': os.getenv('SENDER_PASSWORD'),                # 발신자 이메일 비밀번호 또는 앱 비밀번호
+        'receiver_email': os.getenv('RECEIVER_EMAIL'),                  # 수신자 이메일 주소
     }
 
     # 커뮤니케이터 객체 생성
@@ -392,31 +380,13 @@ def main(args=None):
     # ErrorSubscriber 노드 생성
     error_subscriber = ErrorSubscriber(email_config, communicator)
 
-    # /manipulation 퍼블리셔 생성
-    manipulation_publisher = login_node.create_publisher(String, '/manipulation', 10)
-
     # PyQt5 애플리케이션 생성
     app = QApplication(sys.argv)
     login_window = LoginWindow(login_node, app, communicator)
-
-    # 로그인 창을 닫고 메인 창이 열릴 때 퍼블리셔를 전달
-    def after_open_main_window():
-        if login_window.main_window:  # main_window가 초기화되었는지 확인
-            login_window.main_window.manipulation_publisher = manipulation_publisher
-            login_node.get_logger().info("Manipulation publisher assigned to MainWindow.")
-
-    # open_main_window 메서드에 콜백 추가
-    original_open_main_window = login_window.open_main_window
-
-    def wrapped_open_main_window():
-        original_open_main_window()  # 기존 open_main_window 호출
-        after_open_main_window()    # main_window 초기화 후 퍼블리셔 전달
-
-    login_window.open_main_window = wrapped_open_main_window  # 메서드 덮어쓰기
-
     login_window.show()
 
     # ROS2 스피닝을 PyQt5 이벤트 루프와 통합
+    # QTimer를 사용하여 주기적으로 ROS2 spin_once를 호출합니다.
     def ros_spin():
         rclpy.spin_once(login_node, timeout_sec=0)
         rclpy.spin_once(error_subscriber, timeout_sec=0)
@@ -425,9 +395,10 @@ def main(args=None):
     timer.timeout.connect(ros_spin)
     timer.start(100)  # 100ms마다 spin_once 호출
 
+    # PyQt5 이벤트 루프 실행
     exit_code = app.exec_()
 
-    # ROS2 정리
+    # 애플리케이션 종료 시 ROS2 정리
     login_node.destroy_node()
     error_subscriber.destroy_node()
     rclpy.shutdown()

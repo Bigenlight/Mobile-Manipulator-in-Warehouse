@@ -1,4 +1,0 @@
-[console_scripts]
-error_publisher = pyqt_login.error_publisher:main
-login_node = pyqt_login.login_node:main
-

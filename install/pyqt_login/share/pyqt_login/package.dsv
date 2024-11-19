@@ -1,6 +1,0 @@
-source;share/pyqt_login/hook/pythonpath.ps1
-source;share/pyqt_login/hook/pythonpath.dsv
-source;share/pyqt_login/hook/pythonpath.sh
-source;share/pyqt_login/hook/ament_prefix_path.ps1
-source;share/pyqt_login/hook/ament_prefix_path.dsv
-source;share/pyqt_login/hook/ament_prefix_path.sh

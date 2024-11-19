@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: order-belt-listener
+Version: 0.0.0
+Summary: A ROS2 node to listen to /order and /belt topics and parse messages.
+Home-page: UNKNOWN
+Maintainer: rokey
+Maintainer-email: rokey@example.com
+License: Apache License 2.0
+Platform: UNKNOWN
+
+UNKNOWN
+

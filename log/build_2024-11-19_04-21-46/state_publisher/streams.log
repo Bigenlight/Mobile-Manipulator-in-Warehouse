@@ -1,0 +1,21 @@
+[1.942s] Invoking command in '/home/rokey/3_ws/src/state_publisher': PYTHONPATH=/home/rokey/3_ws/src/build/state_publisher/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/state_publisher/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/state_publisher build --build-base /home/rokey/3_ws/src/build/state_publisher/build install --record /home/rokey/3_ws/src/build/state_publisher/install.log --single-version-externally-managed install_data
+[2.230s] running egg_info
+[2.231s] writing ../build/state_publisher/state_publisher.egg-info/PKG-INFO
+[2.231s] writing dependency_links to ../build/state_publisher/state_publisher.egg-info/dependency_links.txt
+[2.231s] writing entry points to ../build/state_publisher/state_publisher.egg-info/entry_points.txt
+[2.232s] writing requirements to ../build/state_publisher/state_publisher.egg-info/requires.txt
+[2.232s] writing top-level names to ../build/state_publisher/state_publisher.egg-info/top_level.txt
+[2.233s] reading manifest file '../build/state_publisher/state_publisher.egg-info/SOURCES.txt'
+[2.234s] writing manifest file '../build/state_publisher/state_publisher.egg-info/SOURCES.txt'
+[2.234s] running build
+[2.235s] running build_py
+[2.235s] running install
+[2.235s] running install_lib
+[2.236s] running install_data
+[2.237s] running install_egg_info
+[2.238s] removing '/home/rokey/3_ws/src/install/state_publisher/lib/python3.10/site-packages/state_publisher-0.0.0-py3.10.egg-info' (and everything under it)
+[2.239s] Copying ../build/state_publisher/state_publisher.egg-info to /home/rokey/3_ws/src/install/state_publisher/lib/python3.10/site-packages/state_publisher-0.0.0-py3.10.egg-info
+[2.239s] running install_scripts
+[2.261s] Installing state_publisher script to /home/rokey/3_ws/src/install/state_publisher/lib/state_publisher
+[2.262s] writing list of installed files to '/home/rokey/3_ws/src/build/state_publisher/install.log'
+[2.287s] Invoked command in '/home/rokey/3_ws/src/state_publisher' returned '0': PYTHONPATH=/home/rokey/3_ws/src/build/state_publisher/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/state_publisher/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/state_publisher build --build-base /home/rokey/3_ws/src/build/state_publisher/build install --record /home/rokey/3_ws/src/build/state_publisher/install.log --single-version-externally-managed install_data

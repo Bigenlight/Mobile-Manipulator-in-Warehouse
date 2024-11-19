@@ -1,0 +1,408 @@
+[0.096s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build']
+[0.096s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=8, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x7e49994291b0>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x7e4999428d60>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x7e4999428d60>>)
+[0.229s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[0.229s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[0.229s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[0.229s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[0.229s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[0.229s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[0.229s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/rokey/3_ws/src'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[0.229s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[0.238s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[0.238s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[0.238s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[0.238s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[0.238s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[0.238s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[0.238s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[0.238s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[0.238s] Level 1:colcon.colcon_core.package_identification:_identify(image_publisher) by extensions ['ignore', 'ignore_ament_install']
+[0.239s] Level 1:colcon.colcon_core.package_identification:_identify(image_publisher) by extension 'ignore'
+[0.239s] Level 1:colcon.colcon_core.package_identification:_identify(image_publisher) by extension 'ignore_ament_install'
+[0.239s] Level 1:colcon.colcon_core.package_identification:_identify(image_publisher) by extensions ['colcon_pkg']
+[0.239s] Level 1:colcon.colcon_core.package_identification:_identify(image_publisher) by extension 'colcon_pkg'
+[0.239s] Level 1:colcon.colcon_core.package_identification:_identify(image_publisher) by extensions ['colcon_meta']
+[0.239s] Level 1:colcon.colcon_core.package_identification:_identify(image_publisher) by extension 'colcon_meta'
+[0.239s] Level 1:colcon.colcon_core.package_identification:_identify(image_publisher) by extensions ['ros']
+[0.239s] Level 1:colcon.colcon_core.package_identification:_identify(image_publisher) by extension 'ros'
+[0.241s] DEBUG:colcon.colcon_core.package_identification:Package 'image_publisher' with type 'ros.ament_python' and name 'image_publisher'
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extensions ['ignore', 'ignore_ament_install']
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extension 'ignore'
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extension 'ignore_ament_install'
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extensions ['colcon_pkg']
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extension 'colcon_pkg'
+[0.241s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extensions ['colcon_meta']
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extension 'colcon_meta'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extensions ['ros']
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extension 'ros'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extensions ['cmake', 'python']
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extension 'cmake'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extension 'python'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extensions ['python_setup_py']
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules) by extension 'python_setup_py'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extensions ['ignore', 'ignore_ament_install']
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extension 'ignore'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extension 'ignore_ament_install'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extensions ['colcon_pkg']
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extension 'colcon_pkg'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extensions ['colcon_meta']
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extension 'colcon_meta'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extensions ['ros']
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extension 'ros'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extensions ['cmake', 'python']
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extension 'cmake'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extension 'python'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extensions ['python_setup_py']
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv) by extension 'python_setup_py'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extensions ['ignore', 'ignore_ament_install']
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extension 'ignore'
+[0.242s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extension 'ignore_ament_install'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extensions ['colcon_pkg']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extension 'colcon_pkg'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extensions ['colcon_meta']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extension 'colcon_meta'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extensions ['ros']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extension 'ros'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extensions ['cmake', 'python']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extension 'cmake'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extension 'python'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extensions ['python_setup_py']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(node_modules/dotenv/lib) by extension 'python_setup_py'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(order_belt_listener) by extensions ['ignore', 'ignore_ament_install']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(order_belt_listener) by extension 'ignore'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(order_belt_listener) by extension 'ignore_ament_install'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(order_belt_listener) by extensions ['colcon_pkg']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(order_belt_listener) by extension 'colcon_pkg'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(order_belt_listener) by extensions ['colcon_meta']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(order_belt_listener) by extension 'colcon_meta'
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(order_belt_listener) by extensions ['ros']
+[0.243s] Level 1:colcon.colcon_core.package_identification:_identify(order_belt_listener) by extension 'ros'
+[0.244s] DEBUG:colcon.colcon_core.package_identification:Package 'order_belt_listener' with type 'ros.ament_python' and name 'order_belt_listener'
+[0.244s] Level 1:colcon.colcon_core.package_identification:_identify(order_listener) by extensions ['ignore', 'ignore_ament_install']
+[0.244s] Level 1:colcon.colcon_core.package_identification:_identify(order_listener) by extension 'ignore'
+[0.244s] Level 1:colcon.colcon_core.package_identification:_identify(order_listener) by extension 'ignore_ament_install'
+[0.244s] Level 1:colcon.colcon_core.package_identification:_identify(order_listener) by extensions ['colcon_pkg']
+[0.244s] Level 1:colcon.colcon_core.package_identification:_identify(order_listener) by extension 'colcon_pkg'
+[0.244s] Level 1:colcon.colcon_core.package_identification:_identify(order_listener) by extensions ['colcon_meta']
+[0.244s] Level 1:colcon.colcon_core.package_identification:_identify(order_listener) by extension 'colcon_meta'
+[0.244s] Level 1:colcon.colcon_core.package_identification:_identify(order_listener) by extensions ['ros']
+[0.244s] Level 1:colcon.colcon_core.package_identification:_identify(order_listener) by extension 'ros'
+[0.245s] DEBUG:colcon.colcon_core.package_identification:Package 'order_listener' with type 'ros.ament_python' and name 'order_listener'
+[0.245s] Level 1:colcon.colcon_core.package_identification:_identify(pyqt_login) by extensions ['ignore', 'ignore_ament_install']
+[0.245s] Level 1:colcon.colcon_core.package_identification:_identify(pyqt_login) by extension 'ignore'
+[0.245s] Level 1:colcon.colcon_core.package_identification:_identify(pyqt_login) by extension 'ignore_ament_install'
+[0.245s] Level 1:colcon.colcon_core.package_identification:_identify(pyqt_login) by extensions ['colcon_pkg']
+[0.245s] Level 1:colcon.colcon_core.package_identification:_identify(pyqt_login) by extension 'colcon_pkg'
+[0.245s] Level 1:colcon.colcon_core.package_identification:_identify(pyqt_login) by extensions ['colcon_meta']
+[0.245s] Level 1:colcon.colcon_core.package_identification:_identify(pyqt_login) by extension 'colcon_meta'
+[0.245s] Level 1:colcon.colcon_core.package_identification:_identify(pyqt_login) by extensions ['ros']
+[0.245s] Level 1:colcon.colcon_core.package_identification:_identify(pyqt_login) by extension 'ros'
+[0.245s] DEBUG:colcon.colcon_core.package_identification:Package 'pyqt_login' with type 'ros.ament_python' and name 'pyqt_login'
+[0.246s] Level 1:colcon.colcon_core.package_identification:_identify(state_publisher) by extensions ['ignore', 'ignore_ament_install']
+[0.246s] Level 1:colcon.colcon_core.package_identification:_identify(state_publisher) by extension 'ignore'
+[0.246s] Level 1:colcon.colcon_core.package_identification:_identify(state_publisher) by extension 'ignore_ament_install'
+[0.246s] Level 1:colcon.colcon_core.package_identification:_identify(state_publisher) by extensions ['colcon_pkg']
+[0.246s] Level 1:colcon.colcon_core.package_identification:_identify(state_publisher) by extension 'colcon_pkg'
+[0.246s] Level 1:colcon.colcon_core.package_identification:_identify(state_publisher) by extensions ['colcon_meta']
+[0.246s] Level 1:colcon.colcon_core.package_identification:_identify(state_publisher) by extension 'colcon_meta'
+[0.246s] Level 1:colcon.colcon_core.package_identification:_identify(state_publisher) by extensions ['ros']
+[0.246s] Level 1:colcon.colcon_core.package_identification:_identify(state_publisher) by extension 'ros'
+[0.246s] DEBUG:colcon.colcon_core.package_identification:Package 'state_publisher' with type 'ros.ament_python' and name 'state_publisher'
+[0.247s] Level 1:colcon.colcon_core.package_identification:_identify(user_gui) by extensions ['ignore', 'ignore_ament_install']
+[0.247s] Level 1:colcon.colcon_core.package_identification:_identify(user_gui) by extension 'ignore'
+[0.247s] Level 1:colcon.colcon_core.package_identification:_identify(user_gui) by extension 'ignore_ament_install'
+[0.247s] Level 1:colcon.colcon_core.package_identification:_identify(user_gui) by extensions ['colcon_pkg']
+[0.247s] Level 1:colcon.colcon_core.package_identification:_identify(user_gui) by extension 'colcon_pkg'
+[0.247s] Level 1:colcon.colcon_core.package_identification:_identify(user_gui) by extensions ['colcon_meta']
+[0.247s] Level 1:colcon.colcon_core.package_identification:_identify(user_gui) by extension 'colcon_meta'
+[0.247s] Level 1:colcon.colcon_core.package_identification:_identify(user_gui) by extensions ['ros']
+[0.247s] Level 1:colcon.colcon_core.package_identification:_identify(user_gui) by extension 'ros'
+[0.247s] DEBUG:colcon.colcon_core.package_identification:Package 'user_gui' with type 'ros.ament_python' and name 'user_gui'
+[0.247s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[0.247s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[0.247s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[0.247s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[0.247s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[0.264s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[0.264s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[0.265s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 6 installed packages in /home/rokey/3_ws/install
+[0.265s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 1 installed packages in /home/rokey/kwi/install
+[0.266s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 270 installed packages in /opt/ros/humble
+[0.275s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[0.311s] Level 5:colcon.colcon_core.verb:set package 'image_publisher' build argument 'cmake_args' from command line to 'None'
+[0.311s] Level 5:colcon.colcon_core.verb:set package 'image_publisher' build argument 'cmake_target' from command line to 'None'
+[0.311s] Level 5:colcon.colcon_core.verb:set package 'image_publisher' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.311s] Level 5:colcon.colcon_core.verb:set package 'image_publisher' build argument 'cmake_clean_cache' from command line to 'False'
+[0.311s] Level 5:colcon.colcon_core.verb:set package 'image_publisher' build argument 'cmake_clean_first' from command line to 'False'
+[0.311s] Level 5:colcon.colcon_core.verb:set package 'image_publisher' build argument 'cmake_force_configure' from command line to 'False'
+[0.311s] Level 5:colcon.colcon_core.verb:set package 'image_publisher' build argument 'ament_cmake_args' from command line to 'None'
+[0.311s] Level 5:colcon.colcon_core.verb:set package 'image_publisher' build argument 'catkin_cmake_args' from command line to 'None'
+[0.311s] Level 5:colcon.colcon_core.verb:set package 'image_publisher' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.311s] DEBUG:colcon.colcon_core.verb:Building package 'image_publisher' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/rokey/3_ws/src/build/image_publisher', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/rokey/3_ws/src/install/image_publisher', 'merge_install': False, 'path': '/home/rokey/3_ws/src/image_publisher', 'symlink_install': False, 'test_result_base': None}
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_belt_listener' build argument 'cmake_args' from command line to 'None'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_belt_listener' build argument 'cmake_target' from command line to 'None'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_belt_listener' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_belt_listener' build argument 'cmake_clean_cache' from command line to 'False'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_belt_listener' build argument 'cmake_clean_first' from command line to 'False'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_belt_listener' build argument 'cmake_force_configure' from command line to 'False'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_belt_listener' build argument 'ament_cmake_args' from command line to 'None'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_belt_listener' build argument 'catkin_cmake_args' from command line to 'None'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_belt_listener' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.312s] DEBUG:colcon.colcon_core.verb:Building package 'order_belt_listener' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/rokey/3_ws/src/build/order_belt_listener', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/rokey/3_ws/src/install/order_belt_listener', 'merge_install': False, 'path': '/home/rokey/3_ws/src/order_belt_listener', 'symlink_install': False, 'test_result_base': None}
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_listener' build argument 'cmake_args' from command line to 'None'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_listener' build argument 'cmake_target' from command line to 'None'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_listener' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_listener' build argument 'cmake_clean_cache' from command line to 'False'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_listener' build argument 'cmake_clean_first' from command line to 'False'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_listener' build argument 'cmake_force_configure' from command line to 'False'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_listener' build argument 'ament_cmake_args' from command line to 'None'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_listener' build argument 'catkin_cmake_args' from command line to 'None'
+[0.312s] Level 5:colcon.colcon_core.verb:set package 'order_listener' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.313s] DEBUG:colcon.colcon_core.verb:Building package 'order_listener' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/rokey/3_ws/src/build/order_listener', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/rokey/3_ws/src/install/order_listener', 'merge_install': False, 'path': '/home/rokey/3_ws/src/order_listener', 'symlink_install': False, 'test_result_base': None}
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'pyqt_login' build argument 'cmake_args' from command line to 'None'
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'pyqt_login' build argument 'cmake_target' from command line to 'None'
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'pyqt_login' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'pyqt_login' build argument 'cmake_clean_cache' from command line to 'False'
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'pyqt_login' build argument 'cmake_clean_first' from command line to 'False'
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'pyqt_login' build argument 'cmake_force_configure' from command line to 'False'
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'pyqt_login' build argument 'ament_cmake_args' from command line to 'None'
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'pyqt_login' build argument 'catkin_cmake_args' from command line to 'None'
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'pyqt_login' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.313s] DEBUG:colcon.colcon_core.verb:Building package 'pyqt_login' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/rokey/3_ws/src/build/pyqt_login', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/rokey/3_ws/src/install/pyqt_login', 'merge_install': False, 'path': '/home/rokey/3_ws/src/pyqt_login', 'symlink_install': False, 'test_result_base': None}
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'state_publisher' build argument 'cmake_args' from command line to 'None'
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'state_publisher' build argument 'cmake_target' from command line to 'None'
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'state_publisher' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.313s] Level 5:colcon.colcon_core.verb:set package 'state_publisher' build argument 'cmake_clean_cache' from command line to 'False'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'state_publisher' build argument 'cmake_clean_first' from command line to 'False'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'state_publisher' build argument 'cmake_force_configure' from command line to 'False'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'state_publisher' build argument 'ament_cmake_args' from command line to 'None'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'state_publisher' build argument 'catkin_cmake_args' from command line to 'None'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'state_publisher' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.314s] DEBUG:colcon.colcon_core.verb:Building package 'state_publisher' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/rokey/3_ws/src/build/state_publisher', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/rokey/3_ws/src/install/state_publisher', 'merge_install': False, 'path': '/home/rokey/3_ws/src/state_publisher', 'symlink_install': False, 'test_result_base': None}
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'user_gui' build argument 'cmake_args' from command line to 'None'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'user_gui' build argument 'cmake_target' from command line to 'None'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'user_gui' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'user_gui' build argument 'cmake_clean_cache' from command line to 'False'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'user_gui' build argument 'cmake_clean_first' from command line to 'False'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'user_gui' build argument 'cmake_force_configure' from command line to 'False'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'user_gui' build argument 'ament_cmake_args' from command line to 'None'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'user_gui' build argument 'catkin_cmake_args' from command line to 'None'
+[0.314s] Level 5:colcon.colcon_core.verb:set package 'user_gui' build argument 'catkin_skip_building_tests' from command line to 'False'
+[0.314s] DEBUG:colcon.colcon_core.verb:Building package 'user_gui' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/rokey/3_ws/src/build/user_gui', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/rokey/3_ws/src/install/user_gui', 'merge_install': False, 'path': '/home/rokey/3_ws/src/user_gui', 'symlink_install': False, 'test_result_base': None}
+[0.314s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[0.315s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[0.315s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/rokey/3_ws/src/image_publisher' with build type 'ament_python'
+[0.315s] Level 1:colcon.colcon_core.shell:create_environment_hook('image_publisher', 'ament_prefix_path')
+[0.317s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[0.318s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/image_publisher/share/image_publisher/hook/ament_prefix_path.ps1'
+[0.318s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/image_publisher/share/image_publisher/hook/ament_prefix_path.dsv'
+[0.319s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/image_publisher/share/image_publisher/hook/ament_prefix_path.sh'
+[0.319s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.319s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.322s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/rokey/3_ws/src/order_belt_listener' with build type 'ament_python'
+[0.323s] Level 1:colcon.colcon_core.shell:create_environment_hook('order_belt_listener', 'ament_prefix_path')
+[0.323s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/order_belt_listener/share/order_belt_listener/hook/ament_prefix_path.ps1'
+[0.323s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/order_belt_listener/share/order_belt_listener/hook/ament_prefix_path.dsv'
+[0.323s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/order_belt_listener/share/order_belt_listener/hook/ament_prefix_path.sh'
+[0.324s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.324s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.327s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/rokey/3_ws/src/order_listener' with build type 'ament_python'
+[0.327s] Level 1:colcon.colcon_core.shell:create_environment_hook('order_listener', 'ament_prefix_path')
+[0.327s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/order_listener/share/order_listener/hook/ament_prefix_path.ps1'
+[0.328s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/order_listener/share/order_listener/hook/ament_prefix_path.dsv'
+[0.328s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/order_listener/share/order_listener/hook/ament_prefix_path.sh'
+[0.328s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.328s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.331s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/rokey/3_ws/src/pyqt_login' with build type 'ament_python'
+[0.332s] Level 1:colcon.colcon_core.shell:create_environment_hook('pyqt_login', 'ament_prefix_path')
+[0.332s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login/hook/ament_prefix_path.ps1'
+[0.332s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login/hook/ament_prefix_path.dsv'
+[0.333s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login/hook/ament_prefix_path.sh'
+[0.333s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.333s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.336s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/rokey/3_ws/src/state_publisher' with build type 'ament_python'
+[0.336s] Level 1:colcon.colcon_core.shell:create_environment_hook('state_publisher', 'ament_prefix_path')
+[0.337s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/state_publisher/share/state_publisher/hook/ament_prefix_path.ps1'
+[0.337s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/state_publisher/share/state_publisher/hook/ament_prefix_path.dsv'
+[0.337s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/state_publisher/share/state_publisher/hook/ament_prefix_path.sh'
+[0.338s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.338s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.341s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/rokey/3_ws/src/user_gui' with build type 'ament_python'
+[0.341s] Level 1:colcon.colcon_core.shell:create_environment_hook('user_gui', 'ament_prefix_path')
+[0.341s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/user_gui/share/user_gui/hook/ament_prefix_path.ps1'
+[0.342s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/user_gui/share/user_gui/hook/ament_prefix_path.dsv'
+[0.342s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/user_gui/share/user_gui/hook/ament_prefix_path.sh'
+[0.342s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.342s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.564s] WARNING:colcon.colcon_ros.task.ament_python.build:Package 'image_publisher' doesn't explicitly install a marker in the package index (colcon-ros currently does it implicitly but that fallback will be removed in the future)
+[0.564s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/rokey/3_ws/src/image_publisher'
+[0.564s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.564s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[0.807s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/rokey/3_ws/src/order_belt_listener'
+[0.807s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[0.808s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.045s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/rokey/3_ws/src/order_listener'
+[1.046s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.046s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.271s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/rokey/3_ws/src/pyqt_login'
+[1.272s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.272s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.539s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/rokey/3_ws/src/state_publisher'
+[1.539s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.539s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.797s] WARNING:colcon.colcon_ros.task.ament_python.build:Package 'user_gui' doesn't explicitly install a marker in the package index (colcon-ros currently does it implicitly but that fallback will be removed in the future)
+[1.797s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/rokey/3_ws/src/user_gui'
+[1.797s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.797s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[2.150s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/rokey/3_ws/src/image_publisher': PYTHONPATH=/home/rokey/3_ws/src/build/image_publisher/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/image_publisher/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/image_publisher build --build-base /home/rokey/3_ws/src/build/image_publisher/build install --record /home/rokey/3_ws/src/build/image_publisher/install.log --single-version-externally-managed install_data
+[2.186s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/rokey/3_ws/src/user_gui': PYTHONPATH=/home/rokey/3_ws/src/build/user_gui/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/user_gui/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/user_gui build --build-base /home/rokey/3_ws/src/build/user_gui/build install --record /home/rokey/3_ws/src/build/user_gui/install.log --single-version-externally-managed install_data
+[2.294s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/rokey/3_ws/src/order_listener': PYTHONPATH=/home/rokey/3_ws/src/build/order_listener/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/order_listener/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/order_listener build --build-base /home/rokey/3_ws/src/build/order_listener/build install --record /home/rokey/3_ws/src/build/order_listener/install.log --single-version-externally-managed install_data
+[2.336s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/rokey/3_ws/src/order_belt_listener': PYTHONPATH=/home/rokey/3_ws/src/build/order_belt_listener/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/order_belt_listener/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/order_belt_listener build --build-base /home/rokey/3_ws/src/build/order_belt_listener/build install --record /home/rokey/3_ws/src/build/order_belt_listener/install.log --single-version-externally-managed install_data
+[2.347s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/rokey/3_ws/src/state_publisher': PYTHONPATH=/home/rokey/3_ws/src/build/state_publisher/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/state_publisher/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/state_publisher build --build-base /home/rokey/3_ws/src/build/state_publisher/build install --record /home/rokey/3_ws/src/build/state_publisher/install.log --single-version-externally-managed install_data
+[2.358s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/rokey/3_ws/src/pyqt_login': PYTHONPATH=/home/rokey/3_ws/src/build/pyqt_login/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/pyqt_login build --build-base /home/rokey/3_ws/src/build/pyqt_login/build install --record /home/rokey/3_ws/src/build/pyqt_login/install.log --single-version-externally-managed install_data
+[2.510s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/rokey/3_ws/src/user_gui' returned '0': PYTHONPATH=/home/rokey/3_ws/src/build/user_gui/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/user_gui/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/user_gui build --build-base /home/rokey/3_ws/src/build/user_gui/build install --record /home/rokey/3_ws/src/build/user_gui/install.log --single-version-externally-managed install_data
+[2.513s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/user_gui' for CMake module files
+[2.514s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/user_gui' for CMake config files
+[2.514s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/user_gui/lib'
+[2.514s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/user_gui/bin'
+[2.514s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/user_gui/lib/pkgconfig/user_gui.pc'
+[2.515s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/user_gui/lib/python3.10/site-packages'
+[2.515s] Level 1:colcon.colcon_core.shell:create_environment_hook('user_gui', 'pythonpath')
+[2.515s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/user_gui/share/user_gui/hook/pythonpath.ps1'
+[2.515s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/user_gui/share/user_gui/hook/pythonpath.dsv'
+[2.516s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/user_gui/share/user_gui/hook/pythonpath.sh'
+[2.516s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/user_gui/bin'
+[2.516s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(user_gui)
+[2.517s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/user_gui/share/user_gui/package.ps1'
+[2.517s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/rokey/3_ws/src/install/user_gui/share/user_gui/package.dsv'
+[2.518s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/user_gui/share/user_gui/package.sh'
+[2.519s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/user_gui/share/user_gui/package.bash'
+[2.519s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/user_gui/share/user_gui/package.zsh'
+[2.520s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/rokey/3_ws/src/install/user_gui/share/colcon-core/packages/user_gui)
+[2.522s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/image_publisher' for CMake module files
+[2.522s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/rokey/3_ws/src/image_publisher' returned '0': PYTHONPATH=/home/rokey/3_ws/src/build/image_publisher/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/image_publisher/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/image_publisher build --build-base /home/rokey/3_ws/src/build/image_publisher/build install --record /home/rokey/3_ws/src/build/image_publisher/install.log --single-version-externally-managed install_data
+[2.523s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/image_publisher' for CMake config files
+[2.523s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/image_publisher/lib'
+[2.523s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/image_publisher/bin'
+[2.523s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/image_publisher/lib/pkgconfig/image_publisher.pc'
+[2.523s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/image_publisher/lib/python3.10/site-packages'
+[2.523s] Level 1:colcon.colcon_core.shell:create_environment_hook('image_publisher', 'pythonpath')
+[2.524s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/image_publisher/share/image_publisher/hook/pythonpath.ps1'
+[2.524s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/image_publisher/share/image_publisher/hook/pythonpath.dsv'
+[2.525s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/image_publisher/share/image_publisher/hook/pythonpath.sh'
+[2.525s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/image_publisher/bin'
+[2.525s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(image_publisher)
+[2.525s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/image_publisher/share/image_publisher/package.ps1'
+[2.526s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/rokey/3_ws/src/install/image_publisher/share/image_publisher/package.dsv'
+[2.526s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/image_publisher/share/image_publisher/package.sh'
+[2.527s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/image_publisher/share/image_publisher/package.bash'
+[2.527s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/image_publisher/share/image_publisher/package.zsh'
+[2.527s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/rokey/3_ws/src/install/image_publisher/share/colcon-core/packages/image_publisher)
+[2.643s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_belt_listener' for CMake module files
+[2.644s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/rokey/3_ws/src/order_belt_listener' returned '0': PYTHONPATH=/home/rokey/3_ws/src/build/order_belt_listener/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/order_belt_listener/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/order_belt_listener build --build-base /home/rokey/3_ws/src/build/order_belt_listener/build install --record /home/rokey/3_ws/src/build/order_belt_listener/install.log --single-version-externally-managed install_data
+[2.646s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_belt_listener' for CMake config files
+[2.647s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_belt_listener/lib'
+[2.647s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_belt_listener/bin'
+[2.647s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_belt_listener/lib/pkgconfig/order_belt_listener.pc'
+[2.648s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_belt_listener/lib/python3.10/site-packages'
+[2.648s] Level 1:colcon.colcon_core.shell:create_environment_hook('order_belt_listener', 'pythonpath')
+[2.648s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/order_belt_listener/share/order_belt_listener/hook/pythonpath.ps1'
+[2.649s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/order_belt_listener/share/order_belt_listener/hook/pythonpath.dsv'
+[2.649s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/order_belt_listener/share/order_belt_listener/hook/pythonpath.sh'
+[2.650s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_belt_listener/bin'
+[2.650s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(order_belt_listener)
+[2.651s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/order_belt_listener/share/order_belt_listener/package.ps1'
+[2.652s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/rokey/3_ws/src/install/order_belt_listener/share/order_belt_listener/package.dsv'
+[2.652s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/order_belt_listener/share/order_belt_listener/package.sh'
+[2.653s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/order_belt_listener/share/order_belt_listener/package.bash'
+[2.653s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/order_belt_listener/share/order_belt_listener/package.zsh'
+[2.654s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/rokey/3_ws/src/install/order_belt_listener/share/colcon-core/packages/order_belt_listener)
+[2.696s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_listener' for CMake module files
+[2.697s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/rokey/3_ws/src/order_listener' returned '0': PYTHONPATH=/home/rokey/3_ws/src/build/order_listener/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/order_listener/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/order_listener build --build-base /home/rokey/3_ws/src/build/order_listener/build install --record /home/rokey/3_ws/src/build/order_listener/install.log --single-version-externally-managed install_data
+[2.697s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_listener' for CMake config files
+[2.697s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_listener/lib'
+[2.697s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_listener/bin'
+[2.697s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_listener/lib/pkgconfig/order_listener.pc'
+[2.698s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_listener/lib/python3.10/site-packages'
+[2.698s] Level 1:colcon.colcon_core.shell:create_environment_hook('order_listener', 'pythonpath')
+[2.698s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/order_listener/share/order_listener/hook/pythonpath.ps1'
+[2.698s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/order_listener/share/order_listener/hook/pythonpath.dsv'
+[2.699s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/order_listener/share/order_listener/hook/pythonpath.sh'
+[2.699s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/order_listener/bin'
+[2.699s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(order_listener)
+[2.700s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/order_listener/share/order_listener/package.ps1'
+[2.700s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/rokey/3_ws/src/install/order_listener/share/order_listener/package.dsv'
+[2.701s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/order_listener/share/order_listener/package.sh'
+[2.701s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/order_listener/share/order_listener/package.bash'
+[2.701s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/order_listener/share/order_listener/package.zsh'
+[2.702s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/rokey/3_ws/src/install/order_listener/share/colcon-core/packages/order_listener)
+[2.725s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/state_publisher' for CMake module files
+[2.726s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/rokey/3_ws/src/state_publisher' returned '0': PYTHONPATH=/home/rokey/3_ws/src/build/state_publisher/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/state_publisher/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/state_publisher build --build-base /home/rokey/3_ws/src/build/state_publisher/build install --record /home/rokey/3_ws/src/build/state_publisher/install.log --single-version-externally-managed install_data
+[2.726s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/state_publisher' for CMake config files
+[2.727s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/state_publisher/lib'
+[2.727s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/state_publisher/bin'
+[2.727s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/state_publisher/lib/pkgconfig/state_publisher.pc'
+[2.727s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/state_publisher/lib/python3.10/site-packages'
+[2.727s] Level 1:colcon.colcon_core.shell:create_environment_hook('state_publisher', 'pythonpath')
+[2.728s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/state_publisher/share/state_publisher/hook/pythonpath.ps1'
+[2.728s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/state_publisher/share/state_publisher/hook/pythonpath.dsv'
+[2.729s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/state_publisher/share/state_publisher/hook/pythonpath.sh'
+[2.729s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/state_publisher/bin'
+[2.730s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(state_publisher)
+[2.730s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/state_publisher/share/state_publisher/package.ps1'
+[2.730s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/rokey/3_ws/src/install/state_publisher/share/state_publisher/package.dsv'
+[2.731s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/state_publisher/share/state_publisher/package.sh'
+[2.731s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/state_publisher/share/state_publisher/package.bash'
+[2.731s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/state_publisher/share/state_publisher/package.zsh'
+[2.732s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/rokey/3_ws/src/install/state_publisher/share/colcon-core/packages/state_publisher)
+[2.733s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/pyqt_login' for CMake module files
+[2.733s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/rokey/3_ws/src/pyqt_login' returned '0': PYTHONPATH=/home/rokey/3_ws/src/build/pyqt_login/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/pyqt_login build --build-base /home/rokey/3_ws/src/build/pyqt_login/build install --record /home/rokey/3_ws/src/build/pyqt_login/install.log --single-version-externally-managed install_data
+[2.734s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/pyqt_login' for CMake config files
+[2.734s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/pyqt_login/lib'
+[2.734s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/pyqt_login/bin'
+[2.734s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/pyqt_login/lib/pkgconfig/pyqt_login.pc'
+[2.734s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/pyqt_login/lib/python3.10/site-packages'
+[2.734s] Level 1:colcon.colcon_core.shell:create_environment_hook('pyqt_login', 'pythonpath')
+[2.735s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login/hook/pythonpath.ps1'
+[2.735s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login/hook/pythonpath.dsv'
+[2.735s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login/hook/pythonpath.sh'
+[2.736s] Level 1:colcon.colcon_core.environment:checking '/home/rokey/3_ws/src/install/pyqt_login/bin'
+[2.736s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(pyqt_login)
+[2.736s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login/package.ps1'
+[2.737s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login/package.dsv'
+[2.737s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login/package.sh'
+[2.737s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login/package.bash'
+[2.738s] INFO:colcon.colcon_core.shell:Creating package script '/home/rokey/3_ws/src/install/pyqt_login/share/pyqt_login/package.zsh'
+[2.738s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/rokey/3_ws/src/install/pyqt_login/share/colcon-core/packages/pyqt_login)
+[2.738s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[2.739s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[2.739s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[2.739s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[2.744s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[2.744s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[2.744s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[2.757s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[2.758s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/rokey/3_ws/src/install/local_setup.ps1'
+[2.759s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/rokey/3_ws/src/install/_local_setup_util_ps1.py'
+[2.760s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/rokey/3_ws/src/install/setup.ps1'
+[2.761s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/rokey/3_ws/src/install/local_setup.sh'
+[2.762s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/rokey/3_ws/src/install/_local_setup_util_sh.py'
+[2.762s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/rokey/3_ws/src/install/setup.sh'
+[2.763s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/rokey/3_ws/src/install/local_setup.bash'
+[2.764s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/rokey/3_ws/src/install/setup.bash'
+[2.765s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/rokey/3_ws/src/install/local_setup.zsh'
+[2.765s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/rokey/3_ws/src/install/setup.zsh'

@@ -1,0 +1,33 @@
+[1.844s] Invoking command in '/home/rokey/3_ws/src/user_gui': PYTHONPATH=/home/rokey/3_ws/src/build/user_gui/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/user_gui/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/user_gui build --build-base /home/rokey/3_ws/src/build/user_gui/build install --record /home/rokey/3_ws/src/build/user_gui/install.log --single-version-externally-managed install_data
+[2.102s] running egg_info
+[2.103s] creating ../build/user_gui/user_gui.egg-info
+[2.103s] writing ../build/user_gui/user_gui.egg-info/PKG-INFO
+[2.104s] writing dependency_links to ../build/user_gui/user_gui.egg-info/dependency_links.txt
+[2.104s] writing entry points to ../build/user_gui/user_gui.egg-info/entry_points.txt
+[2.104s] writing requirements to ../build/user_gui/user_gui.egg-info/requires.txt
+[2.104s] writing top-level names to ../build/user_gui/user_gui.egg-info/top_level.txt
+[2.105s] writing manifest file '../build/user_gui/user_gui.egg-info/SOURCES.txt'
+[2.106s] reading manifest file '../build/user_gui/user_gui.egg-info/SOURCES.txt'
+[2.107s] writing manifest file '../build/user_gui/user_gui.egg-info/SOURCES.txt'
+[2.107s] running build
+[2.108s] running build_py
+[2.108s] creating /home/rokey/3_ws/src/build/user_gui/build
+[2.109s] creating /home/rokey/3_ws/src/build/user_gui/build/lib
+[2.109s] creating /home/rokey/3_ws/src/build/user_gui/build/lib/user_gui
+[2.109s] copying user_gui/__init__.py -> /home/rokey/3_ws/src/build/user_gui/build/lib/user_gui
+[2.109s] copying user_gui/user_gui.py -> /home/rokey/3_ws/src/build/user_gui/build/lib/user_gui
+[2.109s] running install
+[2.109s] running install_lib
+[2.109s] creating /home/rokey/3_ws/src/install/user_gui/lib/python3.10/site-packages/user_gui
+[2.110s] copying /home/rokey/3_ws/src/build/user_gui/build/lib/user_gui/__init__.py -> /home/rokey/3_ws/src/install/user_gui/lib/python3.10/site-packages/user_gui
+[2.110s] copying /home/rokey/3_ws/src/build/user_gui/build/lib/user_gui/user_gui.py -> /home/rokey/3_ws/src/install/user_gui/lib/python3.10/site-packages/user_gui
+[2.110s] byte-compiling /home/rokey/3_ws/src/install/user_gui/lib/python3.10/site-packages/user_gui/__init__.py to __init__.cpython-310.pyc
+[2.111s] byte-compiling /home/rokey/3_ws/src/install/user_gui/lib/python3.10/site-packages/user_gui/user_gui.py to user_gui.cpython-310.pyc
+[2.116s] running install_data
+[2.116s] copying package.xml -> /home/rokey/3_ws/src/install/user_gui/share/user_gui
+[2.116s] running install_egg_info
+[2.118s] Copying ../build/user_gui/user_gui.egg-info to /home/rokey/3_ws/src/install/user_gui/lib/python3.10/site-packages/user_gui-0.0.1-py3.10.egg-info
+[2.119s] running install_scripts
+[2.140s] Installing user_gui script to /home/rokey/3_ws/src/install/user_gui/lib/user_gui
+[2.141s] writing list of installed files to '/home/rokey/3_ws/src/build/user_gui/install.log'
+[2.169s] Invoked command in '/home/rokey/3_ws/src/user_gui' returned '0': PYTHONPATH=/home/rokey/3_ws/src/build/user_gui/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/user_gui/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/user_gui build --build-base /home/rokey/3_ws/src/build/user_gui/build install --record /home/rokey/3_ws/src/build/user_gui/install.log --single-version-externally-managed install_data

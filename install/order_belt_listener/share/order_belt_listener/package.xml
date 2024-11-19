@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>order_belt_listener</name>
+  <version>0.0.0</version>
+  <description>A ROS2 node to listen to /order and /belt topics and parse messages.</description>
+  <maintainer email="rokey@example.com">rokey</maintainer>
+  <license>Apache License 2.0</license>
+
+  <buildtool_depend>ament_python</buildtool_depend>
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

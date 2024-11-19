@@ -1,0 +1,21 @@
+[1.952s] Invoking command in '/home/rokey/3_ws/src/order_listener': PYTHONPATH=/home/rokey/3_ws/src/build/order_listener/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/order_listener/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/order_listener build --build-base /home/rokey/3_ws/src/build/order_listener/build install --record /home/rokey/3_ws/src/build/order_listener/install.log --single-version-externally-managed install_data
+[2.207s] running egg_info
+[2.208s] writing ../build/order_listener/order_listener.egg-info/PKG-INFO
+[2.208s] writing dependency_links to ../build/order_listener/order_listener.egg-info/dependency_links.txt
+[2.208s] writing entry points to ../build/order_listener/order_listener.egg-info/entry_points.txt
+[2.208s] writing requirements to ../build/order_listener/order_listener.egg-info/requires.txt
+[2.208s] writing top-level names to ../build/order_listener/order_listener.egg-info/top_level.txt
+[2.210s] reading manifest file '../build/order_listener/order_listener.egg-info/SOURCES.txt'
+[2.210s] writing manifest file '../build/order_listener/order_listener.egg-info/SOURCES.txt'
+[2.211s] running build
+[2.211s] running build_py
+[2.211s] running install
+[2.211s] running install_lib
+[2.212s] running install_data
+[2.212s] running install_egg_info
+[2.214s] removing '/home/rokey/3_ws/src/install/order_listener/lib/python3.10/site-packages/order_listener-0.0.0-py3.10.egg-info' (and everything under it)
+[2.214s] Copying ../build/order_listener/order_listener.egg-info to /home/rokey/3_ws/src/install/order_listener/lib/python3.10/site-packages/order_listener-0.0.0-py3.10.egg-info
+[2.215s] running install_scripts
+[2.236s] Installing order_listener script to /home/rokey/3_ws/src/install/order_listener/lib/order_listener
+[2.236s] writing list of installed files to '/home/rokey/3_ws/src/build/order_listener/install.log'
+[2.261s] Invoked command in '/home/rokey/3_ws/src/order_listener' returned '0': PYTHONPATH=/home/rokey/3_ws/src/build/order_listener/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/rokey/3_ws/src/install/order_listener/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated setup.py egg_info --egg-base ../build/order_listener build --build-base /home/rokey/3_ws/src/build/order_listener/build install --record /home/rokey/3_ws/src/build/order_listener/install.log --single-version-externally-managed install_data

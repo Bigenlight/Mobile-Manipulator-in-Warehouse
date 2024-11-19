@@ -1,0 +1,3 @@
+[console_scripts]
+order_belt_listener = order_belt_listener.order_belt_listener:main
+

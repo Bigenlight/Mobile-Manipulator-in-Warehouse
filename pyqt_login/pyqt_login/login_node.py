@@ -1,26 +1,28 @@
 import sys
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
+from std_msgs.msg import String, Int32
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QListWidget,
-    QListWidgetItem, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox, QMessageBox,
-    QSizePolicy, QFrame
+    QListWidgetItem, QVBoxLayout, QHBoxLayout, QGroupBox, QMessageBox, QSizePolicy, QProgressBar
 )
-from PyQt5.QtCore import pyqtSlot, QTimer, Qt, pyqtSignal, QObject, QThread
+from PyQt5.QtCore import QThread, pyqtSignal, QTimer, Qt, QObject, pyqtSlot
 from PyQt5.QtGui import QImage, QPixmap, QFont
 import cv2
 import time
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
 import threading
 import os
-from dotenv import load_dotenv
 
+# --- Communicator class for signal passing ---
 class Communicator(QObject):
-    error_signal = pyqtSignal(str)  # 오류 메시지를 전달할 시그널
+    error_signal = pyqtSignal(str)  # Signal to pass error messages
+    state_signal = pyqtSignal(int)  # Signal to pass state updates
 
+# --- VideoThread for video streaming ---
 class VideoThread(QThread):
     change_pixmap_signal = pyqtSignal(QImage)
 
@@ -30,33 +32,158 @@ class VideoThread(QThread):
         self._run_flag = True
 
     def run(self):
-        # 비디오 소스 열기
+        # Open video source
         cap = cv2.VideoCapture(self.source)
         while self._run_flag:
             ret, cv_img = cap.read()
             if ret:
-                # 이미지를 RGB 형식으로 변환
+                # Convert to RGB
                 cv_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-                # QImage로 변환
                 height, width, channel = cv_img.shape
                 bytes_per_line = 3 * width
                 qt_img = QImage(cv_img.data, width, height, bytes_per_line, QImage.Format_RGB888)
-                # 신호 발생
+                # Emit signal
                 self.change_pixmap_signal.emit(qt_img)
-        # 비디오 소스 해제
+        # Release video source
         cap.release()
 
     def stop(self):
         self._run_flag = False
         self.wait()
 
-class LoginWindow(QWidget):
-    def __init__(self, node: Node, app, communicator: Communicator):
-        super().__init__()
-        self.node = node
-        self.app = app  # QApplication 인스턴스를 참조
+# --- ManipulationPublisherNode publishes to '/manipulation' topic ---
+class ManipulationPublisherNode(Node):
+    def __init__(self):
+        super().__init__('manipulation_publisher')
+        self.publisher = self.create_publisher(String, '/manipulation', 10)
+        self.get_logger().info('ManipulationPublisherNode has been initialized and publishing to "/manipulation" topic.')
+
+    def publish_command(self, command: str):
+        msg = String()
+        msg.data = command
+        self.publisher.publish(msg)
+        self.get_logger().info(f'Published "{command}" to /manipulation topic.')
+
+# --- ManipulationListenerNode subscribes to '/manipulation' topic ---
+class ManipulationListenerNode(Node):
+    def __init__(self):
+        super().__init__('manipulation_listener')
+        self.subscription = self.create_subscription(
+            String,
+            '/manipulation',
+            self.listener_callback,
+            10
+        )
+        self.subscription  # prevent unused variable warning
+        self.get_logger().info("ManipulationListener node has been initialized and subscribed to /manipulation topic.")
+
+    def listener_callback(self, msg):
+        message = msg.data
+        self.get_logger().info(f"Received message: {message}")
+
+        # Perform actions based on message
+        if message == "play":
+            self.get_logger().info("Play command received. Executing 'play' action.")
+            # Add actual action code here
+        elif message == "stop":
+            self.get_logger().info("Stop command received. Executing 'stop' action.")
+            # Add actual action code here
+        elif message == "pause":
+            self.get_logger().info("Pause command received. Executing 'pause' action.")
+            # Add actual action code here
+        elif message == "resume":
+            self.get_logger().info("Resume command received. Executing 'resume' action.")
+            # Add actual action code here
+        elif message == "reset":
+            self.get_logger().info("Reset command received. Executing 'reset' action.")
+            # Add actual action code here
+        elif message == "conveyor_on":
+            self.get_logger().info("Conveyor ON command received. Turning the conveyor ON.")
+            # Add actual action code here
+        elif message == "conveyor_off":
+            self.get_logger().info("Conveyor OFF command received. Turning the conveyor OFF.")
+            # Add actual action code here
+        else:
+            self.get_logger().warning(f"Unknown command received: {message}")
+
+# --- ErrorSubscriberNode subscribes to '/error' topic and sends emails ---
+class ErrorSubscriberNode(Node):
+    def __init__(self, email_config, communicator: Communicator):
+        super().__init__('error_subscriber')
+        self.email_config = email_config
         self.communicator = communicator
-        self.communicator.error_signal.connect(self.show_error_popup)
+        self.subscription = self.create_subscription(
+            String,
+            '/error',
+            self.listener_callback,
+            10
+        )
+        self.subscription  # prevent unused variable warning
+        self.get_logger().info('ErrorSubscriberNode has been initialized and subscribed to "/error" topic.')
+
+    def listener_callback(self, msg):
+        error_message = msg.data
+        self.get_logger().error(f'Received error message: {error_message}')
+        # Send email in a separate thread
+        threading.Thread(target=self.send_email, args=(error_message,)).start()
+        # Emit error_signal
+        self.communicator.error_signal.emit(error_message)
+
+    def send_email(self, error_message):
+        try:
+            smtp_server = self.email_config['smtp_server']
+            smtp_port = self.email_config['smtp_port']
+            sender_email = self.email_config['sender_email']
+            sender_password = self.email_config['sender_password']
+            receiver_email = self.email_config['receiver_email']
+
+            subject = "ROS2 Error Notification"
+            body = f"An error has occurred in the ROS2 system:\n\n{error_message}"
+
+            # MIME setup
+            msg = MIMEMultipart()
+            msg['From'] = sender_email
+            msg['To'] = receiver_email
+            msg['Subject'] = subject
+            msg.attach(MIMEText(body, 'plain'))
+
+            # SMTP connection and send email
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()
+            server.login(sender_email, sender_password)
+            text = msg.as_string()
+            server.sendmail(sender_email, receiver_email, text)
+            server.quit()
+
+            self.get_logger().info(f'Error email sent to {receiver_email}.')
+        except Exception as e:
+            self.get_logger().error(f'Failed to send email: {e}')
+
+# --- StateSubscriberNode subscribes to 'state' topic and emits state_signal ---
+class StateSubscriberNode(Node):
+    def __init__(self, communicator: Communicator):
+        super().__init__('state_subscriber')
+        self.communicator = communicator
+        self.subscription = self.create_subscription(
+            Int32,
+            'state',
+            self.listener_callback,
+            10
+        )
+        self.subscription  # prevent unused variable warning
+        self.get_logger().info('StateSubscriberNode has been initialized and subscribed to "state" topic.')
+
+    def listener_callback(self, msg):
+        state = msg.data
+        self.get_logger().info(f"Received state: {state}")
+        self.communicator.state_signal.emit(state)
+
+# --- LoginWindow class ---
+class LoginWindow(QWidget):
+    def __init__(self, manipulation_node: ManipulationPublisherNode, communicator: Communicator):
+        super().__init__()
+        self.manipulation_node = manipulation_node
+        self.communicator = communicator
         self.main_window = None
         self.init_ui()
 
@@ -80,7 +207,6 @@ class LoginWindow(QWidget):
         layout.addWidget(self.label_password)
         layout.addWidget(self.input_password)
         layout.addWidget(self.button_login)
-
         self.setLayout(layout)
 
     @pyqtSlot()
@@ -88,75 +214,89 @@ class LoginWindow(QWidget):
         username = self.input_username.text()
         password = self.input_password.text()
 
-        # 간단한 예제로 사용자 이름과 비밀번호를 확인합니다.
+        # Simple username and password check
         if username == 'rokey' and password == 'rokey':
             QMessageBox.information(self, 'Login', 'Login Successful!')
-            self.node.get_logger().info(f'User {username} logged in successfully.')
+            self.manipulation_node.get_logger().info(f'User {username} logged in successfully.')
             self.open_main_window()
         else:
             QMessageBox.warning(self, 'Login', 'Invalid username or password.')
 
     def open_main_window(self):
-        self.main_window = MainWindow(self.node, self.communicator)  # MainWindow 인스턴스 생성
+        self.main_window = MainWindow(self.manipulation_node, self.communicator)
         self.main_window.show()
-        self.close()  # 로그인 창 닫기
+        self.close()
 
-    @pyqtSlot(str)
-    def show_error_popup(self, message):
-        QMessageBox.critical(self, 'Error', message)
-
+# --- MainWindow class ---
 class MainWindow(QMainWindow):
-    def __init__(self, node: Node, communicator: Communicator):
+    def __init__(self, manipulation_node: ManipulationPublisherNode, communicator: Communicator):
         super().__init__()
-        self.node = node
+        self.manipulation_node = manipulation_node
         self.communicator = communicator
-        self.manipulation_publisher = None  # 퍼블리셔 초기화
         self.init_ui()
 
     def init_ui(self):
         self.setWindowTitle("터틀봇 조종 GUI")
-        self.setGeometry(100, 100, 1200, 800)  # 초기 윈도우 크기
+        self.setGeometry(100, 100, 1200, 800)  # Initial window size
 
-        # 메인 위젯 및 메인 레이아웃
+        # Main widget and layout
         self.main_widget = QWidget(self)
         self.setCentralWidget(self.main_widget)
         self.main_layout = QVBoxLayout()
         self.main_widget.setLayout(self.main_layout)
 
-        # 상단 레이아웃 (실시간 영상과 YOLO 이미지)
+        # Top layout (video and YOLO images)
         self.top_layout = QHBoxLayout()
         self.main_layout.addLayout(self.top_layout)
 
-        # 실시간 웹캠 영상 표시
+        # Real-time webcam video display
         self.video_label = QLabel(self)
-        self.video_label.setFixedSize(640, 480)  # 고정 크기 설정
+        self.video_label.setFixedSize(640, 480)  # Fixed size
         self.video_label.setStyleSheet("border: 1px solid black;")
         self.video_label.setAlignment(Qt.AlignCenter)
         self.top_layout.addWidget(self.video_label)
 
-        # YOLO 이미지 레이아웃
+        # YOLO image layout
         self.yolo_layout = QVBoxLayout()
         self.top_layout.addLayout(self.yolo_layout)
 
-        # YOLO 시작 이미지
+        # YOLO start image
         self.yolo_start_label = QLabel("YOLO Start Image", self)
         self.yolo_start_label.setFixedSize(320, 240)
         self.yolo_start_label.setStyleSheet("border: 1px solid black;")
         self.yolo_start_label.setAlignment(Qt.AlignCenter)
         self.yolo_layout.addWidget(self.yolo_start_label)
 
-        # YOLO 종료 이미지
+        # YOLO end image
         self.yolo_end_label = QLabel("YOLO End Image", self)
         self.yolo_end_label.setFixedSize(320, 240)
         self.yolo_end_label.setStyleSheet("border: 1px solid black;")
         self.yolo_end_label.setAlignment(Qt.AlignCenter)
         self.yolo_layout.addWidget(self.yolo_end_label)
 
-        # 중앙 레이아웃 (작업 목록 및 시간)
+        # Loading bar layout (below video)
+        self.loading_layout = QVBoxLayout()
+        self.main_layout.addLayout(self.loading_layout)
+
+        # State loading bar
+        self.loading_bar = QProgressBar(self)
+        self.loading_bar.setMaximum(10)
+        self.loading_bar.setValue(0)
+        self.loading_bar.setTextVisible(False)
+        self.loading_bar.setFixedHeight(30)
+        self.loading_layout.addWidget(self.loading_bar)
+
+        # Current state label
+        self.state_label = QLabel("현재 상태: 명령 받았음 (0)", self)
+        self.state_label.setAlignment(Qt.AlignCenter)
+        self.state_label.setStyleSheet("font-size: 14px;")
+        self.loading_layout.addWidget(self.state_label)
+
+        # Middle layout (job list and time)
         self.middle_layout = QHBoxLayout()
         self.main_layout.addLayout(self.middle_layout)
 
-        # 작업 목록과 소요 시간
+        # Job list and time
         self.job_group = QGroupBox("작업 목록")
         self.job_layout = QVBoxLayout()
         self.job_group.setLayout(self.job_layout)
@@ -164,15 +304,12 @@ class MainWindow(QMainWindow):
 
         self.job_list = QListWidget(self)
         self.job_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        
-        # 폰트 크기 설정
+
+        # Font size setting
         font = QFont()
-        font.setPointSize(14)  # 원하는 폰트 크기로 설정 (예: 14)
+        font.setPointSize(14)  # Set desired font size (e.g., 14)
         self.job_list.setFont(font)
-        
-        # 또는 스타일 시트를 사용하여 폰트 크기 설정
-        # self.job_list.setStyleSheet("font-size: 14pt;")
-        
+
         self.job_layout.addWidget(self.job_list)
 
         self.job_time_label = QLabel("소요 시간: 0초", self)
@@ -182,13 +319,13 @@ class MainWindow(QMainWindow):
 
         self.populate_jobs()
 
-        # 컨트롤 레이아웃 (수동 조종 버튼 및 컨베이어 조종)
+        # Control layout (manual control buttons and conveyor control)
         self.control_group = QGroupBox("수동 조종")
         self.control_layout = QVBoxLayout()
         self.control_group.setLayout(self.control_layout)
         self.middle_layout.addWidget(self.control_group, 1)
 
-        # 수동 조종 버튼
+        # Manual control buttons
         self.manual_controls_layout = QHBoxLayout()
         self.control_layout.addLayout(self.manual_controls_layout)
 
@@ -212,7 +349,7 @@ class MainWindow(QMainWindow):
         self.reset_button.setFixedSize(100, 50)
         self.manual_controls_layout.addWidget(self.reset_button)
 
-        # 컨베이어 수동 조종 버튼
+        # Conveyor control buttons
         self.conveyor_group = QGroupBox("컨베이어 조작")
         self.conveyor_layout = QHBoxLayout()
         self.conveyor_group.setLayout(self.conveyor_layout)
@@ -226,12 +363,12 @@ class MainWindow(QMainWindow):
         self.conveyor_off_button.setFixedSize(100, 50)
         self.conveyor_layout.addWidget(self.conveyor_off_button)
 
-        # 타이머 설정 (작업 소요 시간 업데이트)
+        # Timer setup (update job time)
         self.start_time = None
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_time)
 
-        # 버튼 이벤트 연결
+        # Connect buttons to functions
         self.play_button.clicked.connect(self.play_job)
         self.stop_button.clicked.connect(self.stop_job)
         self.pause_button.clicked.connect(self.pause_job)
@@ -241,10 +378,14 @@ class MainWindow(QMainWindow):
         self.conveyor_off_button.clicked.connect(self.conveyor_off)
         self.job_list.currentItemChanged.connect(self.select_job)
 
-        # 비디오 스레드 시작
-        self.thread = VideoThread()
-        self.thread.change_pixmap_signal.connect(self.update_image)
-        self.thread.start()
+        # Connect communicator signals
+        self.communicator.state_signal.connect(self.update_loading_bar)
+        self.communicator.error_signal.connect(self.show_error_popup)
+
+        # Start video thread
+        self.video_thread = VideoThread()
+        self.video_thread.change_pixmap_signal.connect(self.update_image)
+        self.video_thread.start()
 
     def populate_jobs(self):
         jobs = [
@@ -259,9 +400,9 @@ class MainWindow(QMainWindow):
     def select_job(self, current, previous):
         if current:
             QMessageBox.information(self, "작업 선택", f"선택된 작업: {current.text()}")
-            # 작업 시작 시점에 타이머 시작
+            # Start timer
             self.start_time = time.time()
-            self.timer.start(1000)  # 1초마다 업데이트
+            self.timer.start(1000)  # Update every second
 
     def update_time(self):
         if self.start_time:
@@ -270,169 +411,135 @@ class MainWindow(QMainWindow):
 
     def play_job(self):
         QMessageBox.information(self, "Play", "작업을 시작합니다.")
-        self.publish_manipulation_command("play")  # "play" 메시지 발행
+        self.publish_manipulation_command("play")  # Publish "play" command
 
     def stop_job(self):
         QMessageBox.information(self, "Stop", "작업을 중지합니다.")
-        self.publish_manipulation_command("stop")  # "stop" 메시지 발행
+        self.publish_manipulation_command("stop")  # Publish "stop" command
 
     def pause_job(self):
         QMessageBox.information(self, "Pause", "작업을 일시 중지합니다.")
-        self.publish_manipulation_command("pause")  # "pause" 메시지 발행
+        self.publish_manipulation_command("pause")  # Publish "pause" command
 
     def resume_job(self):
         QMessageBox.information(self, "Resume", "작업을 재개합니다.")
-        self.publish_manipulation_command("resume")  # "resume" 메시지 발행
+        self.publish_manipulation_command("resume")  # Publish "resume" command
 
     def reset_job(self):
         QMessageBox.information(self, "Reset", "작업을 초기화합니다.")
         self.job_time_label.setText("소요 시간: 0초")
         self.timer.stop()
         self.start_time = None
-        self.publish_manipulation_command("reset")  # "reset" 메시지 발행
+        self.publish_manipulation_command("reset")  # Publish "reset" command
 
     def conveyor_on(self):
         QMessageBox.information(self, "Conveyor", "컨베이어를 켭니다.")
-        self.publish_manipulation_command("conveyor_on")  # "conveyor_on" 메시지 발행
+        self.publish_manipulation_command("conveyor_on")  # Publish "conveyor_on" command
 
     def conveyor_off(self):
         QMessageBox.information(self, "Conveyor", "컨베이어를 끕니다.")
-        self.publish_manipulation_command("conveyor_off")  # "conveyor_off" 메시지 발행
+        self.publish_manipulation_command("conveyor_off")  # Publish "conveyor_off" command
+
+    def publish_manipulation_command(self, command: str):
+        self.manipulation_node.publish_command(command)
 
     def closeEvent(self, event):
-        """창이 닫힐 때 스레드를 종료"""
-        self.thread.stop()
+        """Close the window and stop threads"""
+        self.video_thread.stop()
         event.accept()
 
     def update_image(self, qt_img):
         self.video_label.setPixmap(QPixmap.fromImage(qt_img).scaled(
             self.video_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
-    def publish_manipulation_command(self, command: str):
-        if self.manipulation_publisher is None:
-            self.node.get_logger().error("Manipulation publisher not initialized.")
-            QMessageBox.critical(self, "Error", "Manipulation publisher not initialized.")
-            return
-        msg = String()
-        msg.data = command
-        self.manipulation_publisher.publish(msg)
-        self.node.get_logger().info(f'Published "{command}" to /manipulation topic.')
+    def update_loading_bar(self, state):
+        """Update the loading bar and state label based on the state"""
+        state_descriptions = {
+            0: "명령 받았음",
+            1: "이동 시작",
+            2: "피킹 장소 도착",
+            3: "박스 잡기 완료",
+            4: "컨베이어 벨트 올리기 중",
+            5: "이동 중",
+            6: "바구니 장소 도착",
+            7: "바구니 잡는 중",
+            8: "이동 중",
+            9: "하역장 도착 완료",
+            10: "하차 완료"
+        }
 
-class ErrorSubscriber(Node):
-    def __init__(self, email_config, communicator: Communicator):
-        super().__init__('error_subscriber')
-        self.subscription = self.create_subscription(
-            String,  # 메시지 타입
-            '/error',  # 토픽 이름
-            self.listener_callback,
-            10  # QoS 프로파일 (큐 사이즈)
-        )
-        self.subscription  # prevent unused variable warning
-        self.email_config = email_config
-        self.communicator = communicator
-        self.get_logger().info('ErrorSubscriber initialized and subscribed to /error topic.')
+        if state in state_descriptions:
+            description = state_descriptions[state]
+            self.loading_bar.setValue(state)
+            self.state_label.setText(f"현재 상태: {description} ({state})")
+        else:
+            self.loading_bar.setValue(0)
+            self.state_label.setText("현재 상태: 알 수 없음")
 
-    def listener_callback(self, msg):
-        error_message = msg.data
-        self.get_logger().error(f'Received error message: {error_message}')
-        # 이메일 발송을 별도의 스레드에서 처리하여 블로킹 방지
-        threading.Thread(target=self.send_email, args=(error_message,)).start()
-        # 팝업 창 표시를 위한 시그널 발송
-        self.communicator.error_signal.emit(error_message)
+    def show_error_popup(self, message):
+        QMessageBox.critical(self, 'Error', message)
 
-    def send_email(self, error_message):
-        try:
-            smtp_server = self.email_config['smtp_server']
-            smtp_port = self.email_config['smtp_port']
-            sender_email = self.email_config['sender_email']
-            sender_password = self.email_config['sender_password']
-            receiver_email = self.email_config['receiver_email']
+# --- Main function ---
+def main():
+    load_dotenv()  # Load .env file if present
 
-            subject = "ROS2 Error Notification"
-            body = f"An error has occurred in the ROS2 system:\n\n{error_message}"
+    # Initialize ROS2
+    rclpy.init(args=None)
 
-            # MIME 설정
-            msg = MIMEMultipart()
-            msg['From'] = sender_email
-            msg['To'] = receiver_email
-            msg['Subject'] = subject
-            msg.attach(MIMEText(body, 'plain'))
-
-            # SMTP 서버에 연결하여 이메일 발송
-            server = smtplib.SMTP(smtp_server, smtp_port)
-            server.starttls()
-            server.login(sender_email, sender_password)
-            text = msg.as_string()
-            server.sendmail(sender_email, receiver_email, text)
-            server.quit()
-
-            self.get_logger().info(f'Error email sent to {receiver_email}.')
-        except Exception as e:
-            self.get_logger().error(f'Failed to send email: {e}')
-
-def main(args=None):
-    load_dotenv()  # .env 파일 로드
-    rclpy.init(args=args)
-
-    # 이메일 설정
+    # Email configuration
     email_config = {
-        'smtp_server': 'smtp.gmail.com',
-        'smtp_port': 587,
-        'sender_email': 'kwilee0426@gmail.com',
-        'sender_password': 'dgnbwiqaizoekfvd',
-        'receiver_email': 'ssm06081@gmail.com',
+        'smtp_server': 'smtp.gmail.com',         # SMTP server address
+        'smtp_port': 587,                        # SMTP port
+        'sender_email': 'kwilee0426@gmail.com',  # Sender email address
+        'sender_password': 'dgnbwiqaizoekfvd',   # Sender email password or app password
+        'receiver_email': 'ssm06081@gmail.com',  # Receiver email address
     }
 
-    # 커뮤니케이터 객체 생성
+    # Create Communicator object
     communicator = Communicator()
 
-    # ROS2 노드 생성
-    login_node = Node('login_node')
+    # Create ROS2 nodes
+    manipulation_node = ManipulationPublisherNode()
+    manipulation_listener_node = ManipulationListenerNode()
+    error_subscriber_node = ErrorSubscriberNode(email_config, communicator)
+    state_subscriber_node = StateSubscriberNode(communicator)
 
-    # ErrorSubscriber 노드 생성
-    error_subscriber = ErrorSubscriber(email_config, communicator)
+    # Create an executor and add all nodes
+    executor = rclpy.executors.MultiThreadedExecutor()
+    executor.add_node(manipulation_node)
+    executor.add_node(manipulation_listener_node)
+    executor.add_node(error_subscriber_node)
+    executor.add_node(state_subscriber_node)
 
-    # /manipulation 퍼블리셔 생성
-    manipulation_publisher = login_node.create_publisher(String, '/manipulation', 10)
+    # Create and start ROS spinning in a separate thread
+    def spin_executor():
+        try:
+            executor.spin()
+        except KeyboardInterrupt:
+            pass
 
-    # PyQt5 애플리케이션 생성
+    spin_thread = threading.Thread(target=spin_executor, daemon=True)
+    spin_thread.start()
+
+    # Create PyQt5 application
     app = QApplication(sys.argv)
-    login_window = LoginWindow(login_node, app, communicator)
 
-    # 로그인 창을 닫고 메인 창이 열릴 때 퍼블리셔를 전달
-    def after_open_main_window():
-        if login_window.main_window:  # main_window가 초기화되었는지 확인
-            login_window.main_window.manipulation_publisher = manipulation_publisher
-            login_node.get_logger().info("Manipulation publisher assigned to MainWindow.")
-
-    # open_main_window 메서드에 콜백 추가
-    original_open_main_window = login_window.open_main_window
-
-    def wrapped_open_main_window():
-        original_open_main_window()  # 기존 open_main_window 호출
-        after_open_main_window()    # main_window 초기화 후 퍼블리셔 전달
-
-    login_window.open_main_window = wrapped_open_main_window  # 메서드 덮어쓰기
-
+    # Create LoginWindow
+    login_window = LoginWindow(manipulation_node, communicator)
     login_window.show()
 
-    # ROS2 스피닝을 PyQt5 이벤트 루프와 통합
-    def ros_spin():
-        rclpy.spin_once(login_node, timeout_sec=0)
-        rclpy.spin_once(error_subscriber, timeout_sec=0)
-
-    timer = QTimer()
-    timer.timeout.connect(ros_spin)
-    timer.start(100)  # 100ms마다 spin_once 호출
-
+    # Execute the application
     exit_code = app.exec_()
 
-    # ROS2 정리
-    login_node.destroy_node()
-    error_subscriber.destroy_node()
+    # Shutdown ROS
+    executor.shutdown()
+    manipulation_node.destroy_node()
+    manipulation_listener_node.destroy_node()
+    error_subscriber_node.destroy_node()
+    state_subscriber_node.destroy_node()
     rclpy.shutdown()
-    sys.exit(exit_code)
 
+    sys.exit(exit_code)
 
 if __name__ == '__main__':
     main()

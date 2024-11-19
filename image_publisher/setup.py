@@ -10,16 +10,16 @@ setup(
     packages=[package_name],
     data_files=[
         # Include package.xml
-        ('share/' + package_name, ['package.xml']),
-        # Include all Python scripts
+        (os.path.join('share', package_name), ['package.xml']),
+        # Include images in share/image_publisher/images
         (os.path.join('share', package_name, 'images'), glob('images/*')),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'ament_index_python'],  # Added 'ament_index_python'
     zip_safe=True,
-    maintainer='Your Name',
-    maintainer_email='your_email@example.com',
+    maintainer='theo',
+    maintainer_email='tpingouin@gmail.com',
     description='ROS2 Image Publisher Package',
-    license='Apache License 2.0',
+    license='Apache License 2.0',  # Ensure this matches package.xml
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [

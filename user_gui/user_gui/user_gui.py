@@ -1,18 +1,28 @@
+# user_gui.py
 import sys
 import threading
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QSpinBox, QHBoxLayout
-from PyQt5.QtCore import Qt
-
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String, Bool  # Import Bool for /belt topic
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QSpinBox, QHBoxLayout
+)
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QImage, QPixmap
+from std_msgs.msg import String, Bool
+from sensor_msgs.msg import CompressedImage  # Changed to CompressedImage
+from cv_bridge import CvBridge
+import cv2
+import numpy as np  # Added import
 
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
 
 class SimpleOrderGUI(QWidget):
+    image_received_signal = pyqtSignal(QImage)  # Signal to update the image in the GUI
+
     def __init__(self, node):
         super().__init__()
         self.node = node  # ROS2 node
+        self.bridge = CvBridge()  # CV Bridge for image conversion
         self.init_ui()
 
         # Publisher for /order topic
@@ -32,11 +42,29 @@ class SimpleOrderGUI(QWidget):
         )
         self.belt_publisher = self.node.create_publisher(Bool, '/belt', qos_profile=qos_belt)
 
+        # Subscriber for /image_topic
+        self.image_subscription = self.node.create_subscription(
+            CompressedImage,  # Changed to CompressedImage
+            '/image_topic',
+            self.image_callback,
+            10)
+        self.image_subscription  # Prevent unused variable warning
+
+        # Connect the signal to the slot
+        self.image_received_signal.connect(self.update_image)
+
     def init_ui(self):
         # Create main layout
         main_layout = QVBoxLayout()
         main_layout.setAlignment(Qt.AlignCenter)
         main_layout.setSpacing(20)
+
+        # Image display label
+        self.image_label = QLabel()
+        self.image_label.setAlignment(Qt.AlignCenter)
+        self.image_label.setText("No image received")
+        self.image_label.setFixedSize(400, 300)  # Adjust dimensions as needed
+        main_layout.addWidget(self.image_label)
 
         # Red box layout
         red_layout = QVBoxLayout()
@@ -127,8 +155,36 @@ class SimpleOrderGUI(QWidget):
 
         self.setLayout(main_layout)
         self.setWindowTitle('Order GUI')
-        self.setFixedSize(300, 500)  # Increased height to accommodate new buttons
+        self.setFixedSize(500, 700)  # Increased height to accommodate new components
         self.show()
+
+    def image_callback(self, msg):
+        try:
+            # Convert CompressedImage message to OpenCV image
+            np_arr = np.frombuffer(msg.data, np.uint8)
+            cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+            if cv_image is None:
+                self.node.get_logger().error("Received empty image")
+                return
+
+            # Convert OpenCV image (BGR) to RGB format
+            cv_image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+            height, width, channel = cv_image_rgb.shape
+            bytes_per_line = 3 * width
+
+            # Convert to QImage
+            q_image = QImage(cv_image_rgb.data, width, height, bytes_per_line, QImage.Format_RGB888)
+
+            # Emit the signal to update the image in the GUI
+            self.image_received_signal.emit(q_image)
+        except Exception as e:
+            self.node.get_logger().error(f"Could not convert image: {e}")
+
+    def update_image(self, q_image):
+        # Convert QImage to QPixmap and display it in the label
+        pixmap = QPixmap.fromImage(q_image)
+        pixmap = pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
+        self.image_label.setPixmap(pixmap)
 
     def send_order(self):
         red_value = self.red_spinbox.value()

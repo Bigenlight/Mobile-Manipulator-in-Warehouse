@@ -1,7 +1,9 @@
+# image_publisher.py
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
 from cv_bridge import CvBridge
+from ament_index_python.packages import get_package_share_directory
 import cv2
 import os
 
@@ -9,8 +11,8 @@ class ImagePublisher(Node):
     def __init__(self):
         super().__init__('image_publisher')
         
-        # Create a publisher for the 'image_topic'
-        self.publisher_ = self.create_publisher(Image, 'image_topic', 10)
+        # Create a publisher for the 'image_topic' with CompressedImage messages
+        self.publisher_ = self.create_publisher(CompressedImage, 'image_topic', 10)
         
         # Set timer to publish image every 5 seconds
         self.timer = self.create_timer(5.0, self.publish_image)
@@ -25,11 +27,9 @@ class ImagePublisher(Node):
         # Initialize image index
         self.current_image = 0
         
-        # Determine the directory where the script is located
-        self.script_dir = os.path.dirname(os.path.realpath(__file__))
-        
-        # Define the relative path to the images directory
-        self.images_dir = os.path.join(self.script_dir, 'images')
+        # Get the path to the images directory in the share directory
+        share_dir = get_package_share_directory('image_publisher')
+        self.images_dir = os.path.join(share_dir, 'images')
         
         # Verify that the images directory exists
         if not os.path.exists(self.images_dir):
@@ -54,12 +54,20 @@ class ImagePublisher(Node):
         img = cv2.imread(image_path)
         
         if img is not None:
-            # Convert the image to ROS2 Image message
-            msg = self.bridge.cv2_to_imgmsg(img, encoding="bgr8")
-            
-            # Publish the message
-            self.publisher_.publish(msg)
-            self.get_logger().info(f'Published image: {image_filename}')
+            # Encode image as JPEG
+            success, encoded_image = cv2.imencode('.jpg', img)
+            if success:
+                # Create CompressedImage message
+                msg = CompressedImage()
+                msg.header.stamp = self.get_clock().now().to_msg()
+                msg.format = "jpeg"
+                msg.data = encoded_image.tobytes()
+                
+                # Publish the message
+                self.publisher_.publish(msg)
+                self.get_logger().info(f'Published image: {image_filename}')
+            else:
+                self.get_logger().warn(f'Failed to encode image: {image_path}')
         else:
             self.get_logger().warn(f'Failed to load image: {image_path}')
         

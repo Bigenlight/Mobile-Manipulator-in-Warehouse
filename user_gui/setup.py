@@ -14,7 +14,7 @@ setup(
         # Include all images
         (os.path.join('share', package_name, 'images'), glob(os.path.join('user_gui', 'images', '*'))),
     ],
-    install_requires=['setuptools', 'rclpy', 'PyQt5'],
+    install_requires=['setuptools', 'rclpy', 'PyQt5', 'opencv-python',],
     zip_safe=True,
     maintainer='Your Name',
     maintainer_email='your_email@example.com',

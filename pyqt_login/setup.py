@@ -24,6 +24,7 @@ setup(
         'console_scripts': [
             'login_node = pyqt_login.login_node:main',
             'error_publisher = pyqt_login.error_publisher:main',
+            'robot_node = pyqt_login.robot_node:main',
         ],
     },
 )

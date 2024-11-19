@@ -24,6 +24,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
+from dotenv import load_dotenv  # Python용 dotenv 가져오기
 
 # --- Communicator class for signal passing ---
 class Communicator(QObject):
@@ -245,6 +246,12 @@ class MainWindow(QMainWindow):
         self.bridge = CvBridge()  # CV Bridge for image conversion
         self.init_ui()
 
+        # Initialize operation time variables
+        self.operation_timer = QTimer()
+        self.operation_timer.timeout.connect(self.update_operation_time)
+        self.start_time = None
+        self.elapsed_time = 0  # in seconds
+
         # Publishers
         qos_order = rclpy.qos.QoSProfile(
             reliability=rclpy.qos.ReliabilityPolicy.RELIABLE,
@@ -314,6 +321,12 @@ class MainWindow(QMainWindow):
         self.state_label.setAlignment(Qt.AlignCenter)
         self.state_label.setStyleSheet("font-size: 14px;")
         self.loading_layout.addWidget(self.state_label)
+
+        # Add operation time label below state_label
+        self.operation_time_label = QLabel("작동 시간: 0초", self)
+        self.operation_time_label.setAlignment(Qt.AlignCenter)
+        self.operation_time_label.setStyleSheet("font-size: 14px;")
+        self.loading_layout.addWidget(self.operation_time_label)  # 새 QLabel 추가
 
         # Right side: Job list and controls
         self.right_layout = QVBoxLayout()
@@ -481,9 +494,9 @@ class MainWindow(QMainWindow):
         if layout is not None:
             while layout.count():
                 child = layout.takeAt(0)
-                if child.widget() is not None:
+                if child.widget():
                     child.widget().deleteLater()
-                elif child.layout() is not None:
+                elif child.layout():
                     self.clear_layout(child.layout())
 
     def image_callback(self, msg):
@@ -544,7 +557,7 @@ class MainWindow(QMainWindow):
     def update_time(self):
         if self.start_time:
             elapsed = int(time.time() - self.start_time)
-            # Update job_time_label if needed
+            # 여기서 추가적인 작업이 필요하면 구현하세요
 
     def play_job(self):
         QMessageBox.information(self, "Play", "작업을 시작합니다.")
@@ -595,6 +608,24 @@ class MainWindow(QMainWindow):
             description = state_descriptions[state]
             self.loading_bar.setValue(state)
             self.state_label.setText(f"현재 상태: {description} ({state})")
+
+            if state == 0:
+                # Reset operation time
+                self.elapsed_time = 0
+                self.operation_time_label.setText(f"작동 시간: {self.elapsed_time}초")
+                self.operation_timer.stop()
+
+            if state == 1 and self.start_time is None:
+                # Start operation timer on first state change (state 1)
+                self.start_time = time.time()
+                self.elapsed_time = 0
+                self.operation_time_label.setText(f"작동 시간: {self.elapsed_time}초")
+                self.operation_timer.start(1000)  # Update every second
+
+            if state == 10:
+                # Stop operation timer on state 10
+                self.operation_timer.stop()
+                self.ros_node.get_logger().info(f"작동 시간: {self.elapsed_time}초")
         else:
             self.loading_bar.setValue(0)
             self.state_label.setText("현재 상태: 알 수 없음")
@@ -602,8 +633,14 @@ class MainWindow(QMainWindow):
     def show_error_popup(self, message):
         QMessageBox.critical(self, 'Error', message)
 
+    def update_operation_time(self):
+        self.elapsed_time += 1
+        self.operation_time_label.setText(f"작동 시간: {self.elapsed_time}초")
+
 # --- Main function ---
 def main():
+    load_dotenv()  # Load .env file if present
+
     # Initialize ROS2
     rclpy.init(args=None)
 

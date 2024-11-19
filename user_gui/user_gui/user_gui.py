@@ -25,6 +25,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 from dotenv import load_dotenv  # Python용 dotenv 가져오기
+import re  # Added for email validation
 
 # --- Communicator class for signal passing ---
 class Communicator(QObject):
@@ -132,7 +133,7 @@ class ErrorSubscriberNode(Node):
         error_message = msg.data
         self.get_logger().error(f'Received error message: {error_message}')
         # Send email in a separate thread
-        threading.Thread(target=self.send_email, args=(error_message,)).start()
+        threading.Thread(target=self.send_email, args=(error_message,), daemon=True).start()
         # Emit error_signal
         self.communicator.error_signal.emit(error_message)
 
@@ -186,11 +187,11 @@ class StateSubscriberNode(Node):
 
 # --- LoginWindow class ---
 class LoginWindow(QWidget):
-    def __init__(self, manipulation_node: ManipulationPublisherNode, communicator: Communicator, ros_node: Node):
+    def __init__(self, manipulation_node: ManipulationPublisherNode, communicator: Communicator, email_config: dict):
         super().__init__()
         self.manipulation_node = manipulation_node
         self.communicator = communicator
-        self.ros_node = ros_node  # Passing the ROS node
+        self.email_config = email_config  # Store reference to email_config
         self.main_window = None
         self.init_ui()
 
@@ -230,7 +231,7 @@ class LoginWindow(QWidget):
             QMessageBox.warning(self, 'Login', 'Invalid username or password.')
 
     def open_main_window(self):
-        self.main_window = MainWindow(self.manipulation_node, self.communicator, self.ros_node)
+        self.main_window = MainWindow(self.manipulation_node, self.communicator, self.email_config)
         self.main_window.show()
         self.close()
 
@@ -238,17 +239,17 @@ class LoginWindow(QWidget):
 class MainWindow(QMainWindow):
     image_received_signal = pyqtSignal(QImage)  # Signal to update the image in the GUI
 
-    def __init__(self, manipulation_node: ManipulationPublisherNode, communicator: Communicator, ros_node: Node):
+    def __init__(self, manipulation_node: ManipulationPublisherNode, communicator: Communicator, email_config: dict):
         super().__init__()
         self.manipulation_node = manipulation_node
         self.communicator = communicator
-        self.ros_node = ros_node  # Passing the ROS node
+        self.email_config = email_config  # Reference to email_config
         self.bridge = CvBridge()  # CV Bridge for image conversion
         self.init_ui()
 
         # Initialize operation time variables
         self.operation_timer = QTimer()
-        self.operation_timer.timeout.connect(self.update_operation_time)
+        self.operation_timer.timeout.connect(self.update_operation_time)  # 연결
         self.start_time = None
         self.elapsed_time = 0  # in seconds
 
@@ -258,7 +259,7 @@ class MainWindow(QMainWindow):
             history=rclpy.qos.HistoryPolicy.KEEP_ALL,
             durability=rclpy.qos.DurabilityPolicy.TRANSIENT_LOCAL
         )
-        self.order_publisher = self.ros_node.create_publisher(String, '/order', qos_profile=qos_order)
+        self.order_publisher = self.manipulation_node.create_publisher(String, '/order', qos_profile=qos_order)
 
         qos_belt = rclpy.qos.QoSProfile(
             reliability=rclpy.qos.ReliabilityPolicy.RELIABLE,
@@ -266,10 +267,10 @@ class MainWindow(QMainWindow):
             depth=10,
             durability=rclpy.qos.DurabilityPolicy.VOLATILE
         )
-        self.belt_publisher = self.ros_node.create_publisher(Bool, '/belt', qos_profile=qos_belt)
+        self.belt_publisher = self.manipulation_node.create_publisher(Bool, '/belt', qos_profile=qos_belt)
 
         # Subscriber for /image_topic
-        self.image_subscription = self.ros_node.create_subscription(
+        self.image_subscription = self.manipulation_node.create_subscription(
             CompressedImage,
             '/image_topic',
             self.image_callback,
@@ -430,7 +431,7 @@ class MainWindow(QMainWindow):
         self.control_layout.addWidget(self.conveyor_group)
 
         # On button
-        self.on_button = QPushButton('on')
+        self.on_button = QPushButton('On')
         self.on_button.clicked.connect(self.belt_on)
         self.on_button.setFixedSize(80, 40)
         self.on_button.setStyleSheet("""
@@ -450,7 +451,7 @@ class MainWindow(QMainWindow):
         self.conveyor_layout.addWidget(self.on_button)
 
         # Off button
-        self.off_button = QPushButton('off')
+        self.off_button = QPushButton('Off')
         self.off_button.clicked.connect(self.belt_off)
         self.off_button.setFixedSize(80, 40)
         self.off_button.setStyleSheet("""
@@ -468,6 +469,25 @@ class MainWindow(QMainWindow):
             }
         """)
         self.conveyor_layout.addWidget(self.off_button)
+
+        # --- Email Input Section ---
+        self.email_group = QGroupBox("Email 설정")
+        self.email_layout = QHBoxLayout()
+        self.email_group.setLayout(self.email_layout)
+
+        self.email_label = QLabel("Email:")
+        self.email_input = QLineEdit()
+        self.email_input.setPlaceholderText("Enter receiver email")
+        self.email_input.textChanged.connect(self.on_email_changed)  # Connect to re-enable check button
+
+        self.check_button = QPushButton("Check")
+        self.check_button.clicked.connect(self.check_email)
+
+        self.email_layout.addWidget(self.email_label)
+        self.email_layout.addWidget(self.email_input)
+        self.email_layout.addWidget(self.check_button)
+
+        self.control_layout.addWidget(self.email_group)  # Add email group below conveyor control
 
         # Timer setup (update job time)
         self.start_time = None
@@ -505,7 +525,7 @@ class MainWindow(QMainWindow):
             np_arr = np.frombuffer(msg.data, np.uint8)
             cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
             if cv_image is None:
-                self.ros_node.get_logger().error("Received empty image")
+                self.manipulation_node.get_logger().error("Received empty image")
                 return
 
             # Convert OpenCV image (BGR) to RGB format
@@ -519,7 +539,7 @@ class MainWindow(QMainWindow):
             # Emit the signal to update the image in the GUI
             self.image_received_signal.emit(q_image)
         except Exception as e:
-            self.ros_node.get_logger().error(f"Could not convert image: {e}")
+            self.manipulation_node.get_logger().error(f"Could not convert image: {e}")
 
     def update_image_label(self, q_image):
         # Update the image_label with the new image
@@ -540,24 +560,25 @@ class MainWindow(QMainWindow):
         msg = String()
         msg.data = order_str
         self.order_publisher.publish(msg)
-        self.ros_node.get_logger().info(f'Published to /order: {order_str}')
+        self.manipulation_node.get_logger().info(f'Published to /order: {order_str}')
 
     def belt_on(self):
         msg = Bool()
         msg.data = True
         self.belt_publisher.publish(msg)
-        self.ros_node.get_logger().info('Published to /belt: True')
+        self.manipulation_node.get_logger().info('Published to /belt: True')
 
     def belt_off(self):
         msg = Bool()
         msg.data = False
         self.belt_publisher.publish(msg)
-        self.ros_node.get_logger().info('Published to /belt: False')
+        self.manipulation_node.get_logger().info('Published to /belt: False')
 
     def update_time(self):
         if self.start_time:
             elapsed = int(time.time() - self.start_time)
-            # 여기서 추가적인 작업이 필요하면 구현하세요
+            # Update operation time label
+            self.operation_time_label.setText(f"작동 시간: {elapsed}초")
 
     def play_job(self):
         QMessageBox.information(self, "Play", "작업을 시작합니다.")
@@ -625,13 +646,34 @@ class MainWindow(QMainWindow):
             if state == 10:
                 # Stop operation timer on state 10
                 self.operation_timer.stop()
-                self.ros_node.get_logger().info(f"작동 시간: {self.elapsed_time}초")
+                self.manipulation_node.get_logger().info(f"작동 시간: {self.elapsed_time}초")
         else:
             self.loading_bar.setValue(0)
             self.state_label.setText("현재 상태: 알 수 없음")
 
     def show_error_popup(self, message):
         QMessageBox.critical(self, 'Error', message)
+
+    # --- Email Check Functionality ---
+    def check_email(self):
+        email = self.email_input.text().strip()
+        if self.validate_email(email):
+            # Email is valid
+            self.email_config['receiver_email'] = email
+            QMessageBox.information(self, 'Email Check', 'Email is valid and set successfully!')
+            self.check_button.setEnabled(False)  # Disable the check button
+        else:
+            # Email is invalid
+            QMessageBox.warning(self, 'Invalid Email', 'Please enter a valid email address.')
+
+    def validate_email(self, email):
+        """Validate email using regex"""
+        regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        return re.match(regex, email) is not None
+
+    def on_email_changed(self, text):
+        """Re-enable the check button if email input is modified"""
+        self.check_button.setEnabled(True)
 
     def update_operation_time(self):
         self.elapsed_time += 1
@@ -644,13 +686,13 @@ def main():
     # Initialize ROS2
     rclpy.init(args=None)
 
-    # Email configuration
+    # Email configuration from environment variables
     email_config = {
-        'smtp_server': 'smtp.gmail.com',         # SMTP server address
-        'smtp_port': 587,                        # SMTP port
-        'sender_email': 'kwilee0426@gmail.com',  # Sender email address
-        'sender_password': 'dgnbwiqaizoekfvd',   # Sender email password or app password
-        'receiver_email': 'ssm06081@gmail.com',  # Receiver email address
+        'smtp_server': os.getenv('SMTP_SERVER', 'smtp.gmail.com'),         # SMTP server address
+        'smtp_port': int(os.getenv('SMTP_PORT', 587)),                     # SMTP port
+        'sender_email': os.getenv('SENDER_EMAIL', 'kwilee0426@gmail.com'), # Sender email address
+        'sender_password': os.getenv('SENDER_PASSWORD', ''),               # Sender email password or app password
+        'receiver_email': '',                                              # Initially empty, to be set via GUI
     }
 
     # Create Communicator object
@@ -687,7 +729,7 @@ def main():
     app = QApplication(sys.argv)
 
     # Create LoginWindow
-    login_window = LoginWindow(manipulation_node, communicator, ros_node)
+    login_window = LoginWindow(manipulation_node, communicator, email_config)
     login_window.show()
 
     # Execute the application

@@ -1,11 +1,14 @@
 import sys
 import cv2
 import time
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import Int32  # 메시지 타입에 맞게 변경하세요
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt5.QtGui import QImage, QPixmap, QFont
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QPushButton, QListWidget, QListWidgetItem,
-    QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox, QMessageBox, QSizePolicy, QFrame
+    QVBoxLayout, QHBoxLayout, QGroupBox, QMessageBox, QSizePolicy, QProgressBar
 )
 
 class VideoThread(QThread):
@@ -36,6 +39,47 @@ class VideoThread(QThread):
     def stop(self):
         self._run_flag = False
         self.wait()
+
+class ROSSubscriberThread(QThread):
+    state_signal = pyqtSignal(int)
+
+    def __init__(self):
+        super().__init__()
+        self.node = None
+
+    def run(self):
+        rclpy.init(args=None)
+        self.node = StateSubscriberNode(self.listener_callback)
+        try:
+            rclpy.spin(self.node)
+        except Exception as e:
+            print(f"ROS Subscriber encountered an exception: {e}")
+        finally:
+            self.node.destroy_node()
+            rclpy.shutdown()
+
+    def listener_callback(self, msg):
+        print(f"Received state: {msg.data}")  # 디버깅용 출력
+        self.state_signal.emit(msg.data)
+
+    def stop(self):
+        if self.node:
+            self.node.destroy_node()
+        rclpy.shutdown()
+        self.quit()
+        self.wait()
+
+class StateSubscriberNode(Node):
+    def __init__(self, callback):
+        super().__init__('state_subscriber')
+        self.subscription = self.create_subscription(
+            Int32,
+            'state',
+            callback,
+            10
+        )
+        self.subscription  # prevent unused variable warning
+        self.get_logger().info('StateSubscriberNode has been initialized and subscribed to "state" topic.')
 
 class MyWindow(QMainWindow):
     def __init__(self):
@@ -77,6 +121,24 @@ class MyWindow(QMainWindow):
         self.yolo_end_label.setStyleSheet("border: 1px solid black;")
         self.yolo_end_label.setAlignment(Qt.AlignCenter)
         self.yolo_layout.addWidget(self.yolo_end_label)
+
+        # 로딩바 레이아웃 추가 (실시간 영상 하단)
+        self.loading_layout = QVBoxLayout()
+        self.main_layout.addLayout(self.loading_layout)
+
+        # 상태 로딩바
+        self.loading_bar = QProgressBar(self)
+        self.loading_bar.setMaximum(10)
+        self.loading_bar.setValue(0)
+        self.loading_bar.setTextVisible(False)
+        self.loading_bar.setFixedHeight(30)
+        self.loading_layout.addWidget(self.loading_bar)
+
+        # 현재 상태 레이블
+        self.state_label = QLabel("현재 상태: 명령 받았음 (0)", self)
+        self.state_label.setAlignment(Qt.AlignCenter)
+        self.state_label.setStyleSheet("font-size: 14px;")
+        self.loading_layout.addWidget(self.state_label)
 
         # 중앙 레이아웃 (작업 목록 및 시간)
         self.middle_layout = QHBoxLayout()
@@ -172,6 +234,11 @@ class MyWindow(QMainWindow):
         self.thread.change_pixmap_signal.connect(self.update_image)
         self.thread.start()
 
+        # ROS 2 구독자 스레드 시작
+        self.ros_thread = ROSSubscriberThread()
+        self.ros_thread.state_signal.connect(self.update_loading_bar)
+        self.ros_thread.start()
+
     def populate_jobs(self):
         jobs = [
             ("Job1", "red*2, blue*1, goto goal 1"),
@@ -228,11 +295,36 @@ class MyWindow(QMainWindow):
     def closeEvent(self, event):
         """창이 닫힐 때 스레드를 종료"""
         self.thread.stop()
+        self.ros_thread.stop()
         event.accept()
 
     def update_image(self, qt_img):
         self.video_label.setPixmap(QPixmap.fromImage(qt_img).scaled(
             self.video_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+
+    def update_loading_bar(self, state):
+        """로딩바와 상태 레이블을 업데이트하는 메서드"""
+        state_descriptions = {
+            0: "명령 받았음",
+            1: "이동 시작",
+            2: "피킹 장소 도착",
+            3: "박스 잡기 완료",
+            4: "컨베이어 벨트 올리기 중",
+            5: "이동 중",
+            6: "바구니 장소 도착",
+            7: "바구니 잡는 중",
+            8: "이동 중",
+            9: "하역장 도착 완료",
+            10: "하차 완료"
+        }
+
+        if state in state_descriptions:
+            description = state_descriptions[state]
+            self.loading_bar.setValue(state)
+            self.state_label.setText(f"현재 상태: {description} ({state})")
+        else:
+            self.loading_bar.setValue(0)
+            self.state_label.setText("현재 상태: 알 수 없음")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

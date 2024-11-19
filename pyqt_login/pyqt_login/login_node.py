@@ -376,11 +376,11 @@ def main(args=None):
 
     # 이메일 설정
     email_config = {
-        'smtp_server': 'smtp.gmail.com',       # SMTP 서버 주소 (예: 'smtp.gmail.com')
-        'smtp_port': 587,                      # SMTP 포트 (일반적으로 587)
-        'sender_email': 'kwilee0426@gmail.com',  # 발신자 이메일 주소
-        'sender_password': 'dgnbwiqaizoekfvd',  # 발신자 이메일 비밀번호 또는 앱 비밀번호
-        'receiver_email': 'ssm06081@gmail.com',  # 수신자 이메일 주소
+        'smtp_server': 'smtp.gmail.com',
+        'smtp_port': 587,
+        'sender_email': 'kwilee0426@gmail.com',
+        'sender_password': 'dgnbwiqaizoekfvd',
+        'receiver_email': 'ssm06081@gmail.com',
     }
 
     # 커뮤니케이터 객체 생성
@@ -398,19 +398,25 @@ def main(args=None):
     # PyQt5 애플리케이션 생성
     app = QApplication(sys.argv)
     login_window = LoginWindow(login_node, app, communicator)
-    
-    def after_login():
+
+    # 로그인 창을 닫고 메인 창이 열릴 때 퍼블리셔를 전달
+    def after_open_main_window():
         if login_window.main_window:  # main_window가 초기화되었는지 확인
             login_window.main_window.manipulation_publisher = manipulation_publisher
+            login_node.get_logger().info("Manipulation publisher assigned to MainWindow.")
 
-    
-    # MainWindow에 퍼블리셔 전달
-    login_window.main_window.manipulation_publisher = manipulation_publisher
+    # open_main_window 메서드에 콜백 추가
+    original_open_main_window = login_window.open_main_window
+
+    def wrapped_open_main_window():
+        original_open_main_window()  # 기존 open_main_window 호출
+        after_open_main_window()    # main_window 초기화 후 퍼블리셔 전달
+
+    login_window.open_main_window = wrapped_open_main_window  # 메서드 덮어쓰기
 
     login_window.show()
 
     # ROS2 스피닝을 PyQt5 이벤트 루프와 통합
-    # QTimer를 사용하여 주기적으로 ROS2 spin_once를 호출합니다.
     def ros_spin():
         rclpy.spin_once(login_node, timeout_sec=0)
         rclpy.spin_once(error_subscriber, timeout_sec=0)
@@ -419,14 +425,14 @@ def main(args=None):
     timer.timeout.connect(ros_spin)
     timer.start(100)  # 100ms마다 spin_once 호출
 
-    # PyQt5 이벤트 루프 실행
     exit_code = app.exec_()
 
-    # 애플리케이션 종료 시 ROS2 정리
+    # ROS2 정리
     login_node.destroy_node()
     error_subscriber.destroy_node()
     rclpy.shutdown()
     sys.exit(exit_code)
+
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-
+# cctv_node.py
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image

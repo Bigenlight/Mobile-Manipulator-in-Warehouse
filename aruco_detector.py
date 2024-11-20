@@ -23,7 +23,7 @@ dist_coeffs = np.array([0.1, -0.05, 0, 0], dtype=np.float64)  # 예제 왜곡 �
 marker_length = 0.0105  # 1.05cm
 
 # 웹캠 캡처 시작 (장치 인덱스 0으로 시도)
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(0)
 
 if not cap.isOpened():
     print("카메라를 열 수 없습니다.")

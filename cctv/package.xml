@@ -10,6 +10,7 @@
   <build_type>ament_python</build_type>
 
   <!-- Build dependencies -->
+  <buildtool_depend>ament_python</buildtool_depend>
   <build_depend>rclpy</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>cv_bridge</build_depend>
@@ -17,7 +18,6 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>launch</build_depend>
   <build_depend>launch_ros</build_depend>
-  <buildtool_depend>ament_python</buildtool_depend>
 
   <!-- Execution dependencies -->
   <exec_depend>rclpy</exec_depend>
@@ -29,11 +29,8 @@
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>python3-opencv</exec_depend>
   <exec_depend>python3-numpy</exec_depend>
-  <exec_depend>python3-ultralytics</exec_depend>
-  <exec_depend>python3-shapely</exec_depend>
+  <!-- Include the following only if you use these packages -->
+  <!-- <exec_depend>python3-ultralytics</exec_depend> -->
+  <!-- <exec_depend>python3-shapely</exec_depend> -->
 
-  <!-- Test dependencies -->
-  <test_depend>ament_flake8</test_depend>
-  <test_depend>ament_pep257</test_depend>
-  <test_depend>python3-pytest</test_depend>
 </package>

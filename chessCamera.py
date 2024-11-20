@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import os
+import time  # 딜레이를 추가하기 위해 time 모듈 추가
 
 # 체커보드의 내부 코너 수 (가로 x 세로)
 CHECKERBOARD = (6, 9)  # 체스보드의 내부 코너 개수
@@ -22,10 +23,10 @@ if not cap.isOpened():
     exit()
 
 print("웹캠이 열렸습니다. 체스보드를 카메라에 보여주세요.")
-print("10개의 체스보드 이미지가 수집되면 캘리브레이션을 수행합니다.")
+print("100개의 체스보드 이미지가 수집되면 캘리브레이션을 수행합니다.")
 
 collected_images = 0  # 수집된 체스보드 이미지 개수
-required_images = 10  # 캘리브레이션에 필요한 체스보드 이미지 개수
+required_images = 100  # 캘리브레이션에 필요한 체스보드 이미지 개수
 
 while collected_images < required_images:
     ret, frame = cap.read()
@@ -50,6 +51,9 @@ while collected_images < required_images:
         cv2.drawChessboardCorners(frame, CHECKERBOARD, corners2, ret)
         collected_images += 1
         print(f"체스보드 이미지 수집 {collected_images}/{required_images} 완료")
+
+        # 0.1초 딜레이 추가
+        time.sleep(0.1)
 
     # 화면에 출력
     cv2.imshow('Calibration', frame)

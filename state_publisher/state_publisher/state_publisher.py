@@ -9,7 +9,7 @@ class StatePublisher(Node):
     def __init__(self):
         super().__init__('state_publisher')
         self.publisher_ = self.create_publisher(Int32, 'state', 10)
-        self.timer_period = 3  # 3초마다 퍼블리시
+        self.timer_period = 4  # 3초마다 퍼블리시
         self.timer = self.create_timer(self.timer_period, self.timer_callback)
         self.state = 0
         self.repeat_count = 0  # 4번 상태를 퍼블리시한 횟수

@@ -1,6 +1,0 @@
-PyQt5
-numpy
-opencv-python
-python-dotenv
-rclpy
-setuptools

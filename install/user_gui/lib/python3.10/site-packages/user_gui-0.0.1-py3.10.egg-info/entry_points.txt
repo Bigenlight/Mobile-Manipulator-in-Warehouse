@@ -1,3 +1,0 @@
-[console_scripts]
-user_gui = user_gui.user_gui:main
-

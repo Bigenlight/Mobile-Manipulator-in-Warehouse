@@ -1,3 +1,0 @@
-[console_scripts]
-order_listener = order_listener.order_listener_node:main
-

@@ -1,5 +1,3 @@
-# 4.5 버전
-
 import cv2
 import numpy as np
 
@@ -9,7 +7,7 @@ camera_matrix = np.load(f'{calibration_path}/calibration_matrix_webcam1.npy')
 dist_coeffs = np.load(f'{calibration_path}/distortion_coefficients_webcam1.npy')
 
 # Select ArUco dictionary
-aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_250)
+aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_100)
 
 # Create DetectorParameters
 aruco_params = cv2.aruco.DetectorParameters_create()
@@ -17,14 +15,17 @@ aruco_params = cv2.aruco.DetectorParameters_create()
 # Real size of the ArUco marker (in meters)
 marker_length = 0.107  # Update this value based on your marker's actual size
 
+# Define the marker IDs you want to detect
+target_marker_ids = [41, 42]
+
 # Start capturing from webcam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(2)
 
 if not cap.isOpened():
     print("카메라를 열 수 없습니다.")
     exit()
 
-print("카메라가 열렸습니다. ArUco 마커(ID42)를 카메라에 보여주세요.")
+print("카메라가 열렸습니다. ArUco 마커(ID41, ID42)를 카메라에 보여주세요.")
 
 while True:
     ret, frame = cap.read()
@@ -45,11 +46,14 @@ while True:
         detected_ids = ids.flatten()
         print(f"감지된 마커 ID: {detected_ids}")
 
+    # Dictionary to store the translation vectors of detected markers
+    marker_positions = {}
+
     # Visualization and pose estimation
     if ids is not None:
         for i, (corner, marker_id) in enumerate(zip(corners, ids.flatten())):
-            if marker_id != 42:
-                continue  # Only process marker with ID 42
+            if marker_id not in target_marker_ids:
+                continue  # Only process markers with ID 41 and 42
 
             # Pose estimation
             rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
@@ -59,6 +63,9 @@ while True:
             # Pose estimation results are arrays; extract the first marker
             rvec = rvecs[0][0]
             tvec = tvecs[0][0]
+
+            # Store the translation vector in the dictionary
+            marker_positions[marker_id] = tvec
 
             # Output relative coordinates
             x, y, z = tvec
@@ -93,6 +100,22 @@ while True:
     # Visualization of rejected markers (for debugging)
     if rejected:
         cv2.aruco.drawDetectedMarkers(frame, rejected, borderColor=(100, 0, 240))
+
+    # Calculate distance between two markers if both are detected
+    if len(marker_positions) == 2:
+        # Extract positions
+        pos1 = marker_positions[target_marker_ids[0]]
+        pos2 = marker_positions[target_marker_ids[1]]
+
+        # Calculate Euclidean distance between the two markers
+        inter_marker_distance = np.linalg.norm(pos1 - pos2)
+        print(f"Markers {target_marker_ids[0]} and {target_marker_ids[1]} 사이 거리: {inter_marker_distance:.3f}m")
+
+        # Optional: Display the inter-marker distance on the frame
+        # Choose a position to place the text, e.g., center of the frame
+        frame_center = (frame.shape[1] // 2, frame.shape[0] // 2)
+        distance_text = f"Distance between ID41 & ID42: {inter_marker_distance:.2f}m"
+        cv2.putText(frame, distance_text, frame_center, cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 
     # Display the frame
     cv2.imshow('ArUco Marker Pose', frame)

@@ -1,25 +1,26 @@
 import cv2
 import numpy as np
 
-if __name__ == "__main__":
+def main():
     # 카메라 캘리브레이션 정보
     camera_matrix = np.array([
-        [1.39033663e+03, 0.00000000e+00, 9.91162822e+02],
-        [0.00000000e+00, 1.30813689e+03, 3.77377837e+02],
+        [4.20206927e+02, 0.00000000e+00, 3.09996813e+02],
+        [0.00000000e+00, 4.22554304e+02, 2.32743975e+02],
         [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]
     ])
-    dist_coeffs = np.array([-0.63828017, 1.24702716, 0.01994982, 0.01576975, -1.00601758])
+    
+    dist_coeffs = np.array([5.96212387e-02, -1.55974578e-01, -9.76032365e-03, 2.33071430e-03, 1.74747614e-01])
 
     # 마커 길이 (미터 단위, 검은 테두리 포함)
-    marker_length = 0.18  # 18cm
+    marker_length = 0.107  # 10.5cm
 
     # ArUco 사전 생성
-    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_50)
+    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_5X5_100)
     parameters = cv2.aruco.DetectorParameters()
     detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
 
-    # 카메라 초기화
-    cap = cv2.VideoCapture(0)  # 2번 카메라 열기
+    # 카메라 초기화 (기본 카메라 0번)
+    cap = cv2.VideoCapture(0)
 
     if not cap.isOpened():
         print("카메라를 열 수 없습니다.")
@@ -45,36 +46,30 @@ if __name__ == "__main__":
             # 마커의 포즈 추정
             rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(corners, marker_length, camera_matrix, dist_coeffs)
 
-            # ID 11과 ID 10의 상대 위치 계산
-            if len(ids) >= 2:  # 최소 두 개의 마커가 검출되어야 함
-                try:
-                    # ID 11의 인덱스
-                    idx_11 = np.where(ids == 11)[0][0]
-                    # ID 10의 인덱스
-                    idx_10 = np.where(ids == 10)[0][0]
-
-                    # ID 11의 회전 및 이동 정보
-                    rvec_11, tvec_11 = rvecs[idx_11], tvecs[idx_11]
-                    R_11, _ = cv2.Rodrigues(rvec_11)  # 회전 행렬로 변환
-
-                    # ID 10의 회전 및 이동 정보
-                    rvec_10, tvec_10 = rvecs[idx_10], tvecs[idx_10]
-                    R_10, _ = cv2.Rodrigues(rvec_10)  # 회전 행렬로 변환
-
-                    # ID 11 기준에서 ID 10의 상대 위치
-                    relative_position = np.dot(R_11.T, (tvec_10 - tvec_11).reshape(-1, 1)).flatten()
-                    print(f"ID 11 기준으로 ID 10의 상대 위치: {relative_position}")
-
-                except IndexError:
-                    print("ID 11 또는 ID 10이 검출되지 않았습니다.")
-
             for i in range(len(ids)):
                 # 각 마커의 축 그리기
                 cv2.drawFrameAxes(img, camera_matrix, dist_coeffs, rvecs[i], tvecs[i], marker_length * 0.5)
 
                 # 마커 ID 표시
-                cv2.putText(img, f"ID: {ids[i][0]}", (int(corners[i][0][0][0]), int(corners[i][0][0][1]) - 10),
+                # 마커의 좌상단 코너에 ID를 표시
+                corner = corners[i][0][0]
+                cv2.putText(img, f"ID: {ids[i][0]}", (int(corner[0]), int(corner[1]) - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+                # 마커의 3D 좌표와 거리 계산
+                tvec = tvecs[i][0]
+                distance = np.linalg.norm(tvec)  # 카메라로부터의 거리
+
+                # 좌표 및 거리 표시
+                coord_text = f"X: {tvec[0]:.2f}m Y: {tvec[1]:.2f}m Z: {tvec[2]:.2f}m"
+                distance_text = f"Distance: {distance:.2f}m"
+
+                # 텍스트를 마커 근처에 표시
+                text_position = (int(corner[0]), int(corner[1]) + 20)
+                cv2.putText(img, coord_text, text_position,
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                cv2.putText(img, distance_text, (text_position[0], text_position[1] + 20),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
         # 결과 이미지 표시
         cv2.imshow("ArUco Marker Detection", img)
@@ -86,3 +81,6 @@ if __name__ == "__main__":
     # 자원 해제
     cap.release()
     cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()

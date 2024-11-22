@@ -16,7 +16,7 @@ def capture_image():
     
     image_count = 0
     # cap = cv2.VideoCapture(0)   #PC Camera
-    cap = cv2.VideoCapture(0)   #USB Camera
+    cap = cv2.VideoCapture(2)   #USB Camera
     
     while True:
         ret, frame = cap.read()

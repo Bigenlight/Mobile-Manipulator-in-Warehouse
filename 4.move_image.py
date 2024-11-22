@@ -59,7 +59,7 @@ def split_files(source_directory, train_dir="./my_data/train/images",
     print(f"Files split into {train_dir}, {validation_dir}, and {test_dir} directories.")
 
 def main():
-    source_directory = '../labelImg/captured_frames' # 수정
+    source_directory = '/home/rokey/3_ws/src/img_capture' # 수정
     split_files(source_directory)
 
 if __name__ == "__main__":

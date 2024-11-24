@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Image
-from std_msgs.msg import String  # 스트링
+from std_msgs.msg import String
 from cv_bridge import CvBridge
 from ultralytics import YOLO
 import cv2
@@ -10,50 +10,61 @@ import threading
 import time
 import os
 import math
-from shapely.geometry import Polygon
-import argparse  # argparse 모듈 추가
-import json  # Import json for serialization
-from datetime import datetime  # Import datetime for timestamp formatting
+import argparse
+import json
+from datetime import datetime
+
+# Import DeepSORT
+from deep_sort_realtime.deepsort_tracker import DeepSort
 
 class YoloPublisher(Node):
     def __init__(self, model_path):
         super().__init__('yolo_publisher')
         
         # Publishers
-        self.publisher_ = self.create_publisher(Image, 'image_raw', 10)  # 토픽 이름 변경
-        self.alarm_publisher = self.create_publisher(String, 'alarm', 10)  # 알람 퍼블리시
-        self.detection_publisher = self.create_publisher(String, 'detection_info', 10)  # New publisher
+        self.publisher_ = self.create_publisher(Image, 'image_raw', 10)
+        self.alarm_publisher = self.create_publisher(String, 'alarm', 10)
+        self.detection_publisher = self.create_publisher(String, 'detection_info', 10)
         
         # Bridge and Model
         self.bridge = CvBridge()
-        self.model = YOLO(model_path)  # 전달받은 모델 경로 사용
+        self.model = YOLO(model_path)
         
+        # Initialize DeepSORT Tracker
+        self.tracker = DeepSort(
+            max_age=30,
+            n_init=3,
+            nms_max_overlap=1.0,
+            max_cosine_distance=0.2,
+            nn_budget=None,
+            override_track_class=None,
+            embedder="mobilenet",
+            half=True,
+            bgr=True,
+            embedder_gpu=True,
+            embedder_model_name="mars-small128.pb",
+            embedder_warmup=0,
+        )
+
         # Initialization
-        self.coordinates = []
         self.output_dir = './output'
         os.makedirs(self.output_dir, exist_ok=True)
         
         # Video capture setup
-        self.cap = cv2.VideoCapture(4)  # Adjusted to default camera source (0)
-        self.cap.set(3, 640)  # Width
-        self.cap.set(4, 480)  # Height
+        self.cap = cv2.VideoCapture(0)
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # Width
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)  # Height
         
         # Get image dimensions
         self.image_width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.image_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        
-        # Define the rectangle in the top-right corner (1.3 times the original height)
-        self.rect_x1 = int(self.image_width * 0.5)  # Starting at 50% of the width
-        self.rect_y1 = 0  # Top of the image
-        self.rect_x2 = self.image_width  # Right edge of the image
-        self.rect_y2 = int(self.image_height * 0.65)  # 65% of the height
         
         # Control flags
         self.frame_count = 0  # Used to process every other frame
         self.lock = threading.Lock()
         self.current_frame = None
         self.processed_frame = None
-        self.classNames = ['blue' , 'red']
+        self.classNames = ['blue', 'red']
         self.blue_previously_detected = False  # Tracks previous detection state
 
         # Start threads
@@ -71,7 +82,7 @@ class YoloPublisher(Node):
             time.sleep(0.01)  # Slight delay to control frame rate
 
     def process_frames(self):
-        """Process frames for object detection in a separate thread."""
+        """Process frames for object detection and tracking in a separate thread."""
         while rclpy.ok():
             if self.current_frame is not None and self.frame_count % 2 == 0:
                 with self.lock:
@@ -79,63 +90,65 @@ class YoloPublisher(Node):
                     
                 blue_detected = False  # Flag to check if a blue object is detected
                 detection_info_list = []  # List to store detection info
-                blue_count = 0  # 카운트 초기화
-                red_count = 0  # 카운트 초기화
+                blue_count = 0  # Initialize blue count
+                red_count = 0  # Initialize red count
 
-                # Draw the red rectangle in the top-right corner
-                cv2.rectangle(frame_to_process, 
-                              (self.rect_x1, self.rect_y1), 
-                              (self.rect_x2, self.rect_y2), 
-                              (0, 0, 255), 4)  # Red rectangle with thickness 4
-
-                # Define the rectangle polygon
-                rect_polygon = Polygon([
-                    (self.rect_x1, self.rect_y1),
-                    (self.rect_x2, self.rect_y1),
-                    (self.rect_x2, self.rect_y2),
-                    (self.rect_x1, self.rect_y2)
-                ])
-
-                # Run YOLO object detection on every other frame
+                # Run YOLO object detection
                 results = self.model(frame_to_process, stream=True)
+                
+                # Prepare detections for DeepSORT
+                detections = []
+                detection_classes = []
                 for r in results:
                     for box in r.boxes:
                         x1, y1, x2, y2 = map(int, box.xyxy[0])
-                        confidence = math.ceil(box.conf[0] * 100) / 100
+                        confidence = float(box.conf[0])
                         cls = int(box.cls[0])
-                        # 감시 박스
-                        cv2.rectangle(frame_to_process, (x1, y1), (x2, y2), (0, 0, 255), 2)  # Red bounding box
-                        cv2.putText(frame_to_process, f"{self.classNames[cls]}: {confidence}", (x1, y1 - 10),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)  # Blue text above the box
-                        
-                        # Create a polygon for the detection box
-                        box_polygon = Polygon([
-                            (x1, y1),
-                            (x2, y1),
-                            (x2, y2),
-                            (x1, y2)
-                        ])
-                        # Check if the detection box intersects with the rectangle
-                        if box_polygon.intersects(rect_polygon):
-                            # Get the current time for each detection
-                            current_time_ros = self.get_clock().now()
-                            current_time_nanosec = current_time_ros.nanoseconds
-                            current_time = datetime.fromtimestamp(current_time_nanosec / 1e9).isoformat()
+                        if cls >= len(self.classNames):
+                            continue  # Skip unknown classes
+                        detections.append(([x1, y1, x2 - x1, y2 - y1], confidence, cls))
+                        detection_classes.append(cls)
 
-                            detection_info = {
-                                'time': current_time,
-                                'box_coordinates': [x1, y1, x2, y2],
-                                'class_number': cls,
-                                'confidence': confidence
-                            }
-                            detection_info_list.append(detection_info)
+                # Update tracker with detections
+                tracks = self.tracker.update_tracks(detections, frame=frame_to_process)
 
-                            # 클래스에 따라 카운트 증가 및 플래그 설정
-                            if cls == 0:  # blue
-                                blue_detected = True  # Set flag since a blue object is detected within the rectangle
-                                blue_count += 1
-                            elif cls == 1:  # red
-                                red_count += 1
+                for track in tracks:
+                    if not track.is_confirmed():
+                        continue
+                    track_id = track.track_id
+                    ltrb = track.to_ltrb()
+                    x1, y1, x2, y2 = map(int, ltrb)
+                    cls = track.det_class  # Detected class
+                    confidence = track.det_conf
+
+                    # Draw bounding box and put text including the ID
+                    cv2.rectangle(frame_to_process, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Green bounding box
+                    cv2.putText(
+                        frame_to_process,
+                        f"ID: {track_id}, {self.classNames[cls]}: {confidence:.2f}",
+                        (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.6,
+                        (0, 255, 0),
+                        2
+                    )
+
+                    # Prepare detection info
+                    detection_info = {
+                        'id': track_id,
+                        'time': datetime.now().isoformat(),
+                        'box_coordinates': [x1, y1, x2, y2],
+                        'class_number': cls,
+                        'confidence': confidence
+                    }
+                    detection_info_list.append(detection_info)
+
+                    # Update counts based on class
+                    if cls == 0:  # blue
+                        blue_detected = True
+                        blue_count += 1
+                    elif cls == 1:  # red
+                        red_count += 1
 
                 # Publish the alarm message based on blue detection
                 if blue_detected and not self.blue_previously_detected:
@@ -189,20 +202,24 @@ class YoloPublisher(Node):
 def main(args=None):
     rclpy.init(args=args)
     
-    # argparse를 사용하여 명령줄 인자 파싱
+    # Parse command-line arguments
     parser = argparse.ArgumentParser(description='YoloPublisher Node')
     parser.add_argument('--user', type=str, default='rokey', help='User name for model path')
     args, unknown = parser.parse_known_args()
     
-    # 모델 경로 생성
+    # Model path
     model_path = f'/home/{args.user}/3_ws/src/best.pt'
     
-    # YoloPublisher 노드 생성 시 모델 경로 전달
+    # Create and spin the node
     node = YoloPublisher(model_path)
     
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

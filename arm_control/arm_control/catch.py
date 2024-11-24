@@ -8,9 +8,6 @@ from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
 from std_msgs.msg import Empty
 
-import time
-import math
-
 class MoveUpwardClient(Node):
     def __init__(self):
         super().__init__('move_upward_client')
@@ -59,6 +56,7 @@ class MoveUpwardClient(Node):
 
         # 대기 타이머 변수 초기화
         self.wait_timer = None
+        self.check_position_timer = None
 
     def kinematics_pose_callback(self, msg):
         self.current_pose = msg.pose
@@ -91,12 +89,25 @@ class MoveUpwardClient(Node):
             self.get_logger().info('Command to move z=-0.015 sent successfully.')
             # 목표 위치에 도달했는지 확인하기 위해 타이머 시작
             self.target_z = -0.015
-            self.step = 2
-            self.move_gripper()
+            self.step = 1
+            self.check_position_timer = self.create_timer(0.1, self.check_position)
         except Exception as e:
             self.get_logger().error(f'Failed to send command to move z=-0.015: {e}')
 
-    def move_gripper(self):
+    def check_position(self):
+        # 현재 z 위치와 목표 z 위치 비교
+        current_z = self.current_pose.position.z
+        if abs(current_z - self.target_z) < 0.005:  # 오차 허용 범위 5mm
+            self.get_logger().info(f'Target z={self.target_z} reached.')
+            self.check_position_timer.cancel()
+            if self.step == 1:
+                self.step = 2
+                self.close_gripper()
+            elif self.step == 3:
+                self.step = 4
+                self.publish_convayor()
+
+    def close_gripper(self):
         self.get_logger().info('Closing the gripper.')
         self.tool_control_req.joint_position.joint_name = ['gripper']
         self.tool_control_req.joint_position.position = [-0.01]  # 그리퍼 완전 닫기
@@ -138,16 +149,6 @@ class MoveUpwardClient(Node):
             self.check_position_timer = self.create_timer(0.1, self.check_position)
         except Exception as e:
             self.get_logger().error(f'Failed to send command to move z=0.15: {e}')
-
-    def check_position(self):
-        # 현재 z 위치와 목표 z 위치 비교
-        current_z = self.current_pose.position.z
-        if abs(current_z - self.target_z) < 0.005:  # 오차 허용 범위 5mm
-            self.get_logger().info(f'Target z={self.target_z} reached.')
-            self.check_position_timer.cancel()
-            if self.step == 3:
-                self.step = 4
-                self.publish_convayor()
 
     def publish_convayor(self):
         self.get_logger().info('Publishing to convayor topic.')

@@ -6,7 +6,6 @@ from open_manipulator_msgs.srv import SetKinematicsPose, SetJointPosition
 from open_manipulator_msgs.msg import KinematicsPose
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
-from threading import Event
 from std_msgs.msg import Empty
 
 import time
@@ -57,8 +56,9 @@ class MoveUpwardClient(Node):
 
         # 단계 관리 변수
         self.step = 0
-        self.target_reached = False
-        self.gripper_closed = False
+
+        # 대기 타이머 변수 초기화
+        self.wait_timer = None
 
     def kinematics_pose_callback(self, msg):
         self.current_pose = msg.pose
@@ -91,26 +91,12 @@ class MoveUpwardClient(Node):
             self.get_logger().info('Command to move z=-0.015 sent successfully.')
             # 목표 위치에 도달했는지 확인하기 위해 타이머 시작
             self.target_z = -0.015
-            self.target_reached = False
-            self.check_position_timer = self.create_timer(0.1, self.check_position)
+            self.step = 2
+            self.move_gripper()
         except Exception as e:
             self.get_logger().error(f'Failed to send command to move z=-0.015: {e}')
 
-    def check_position(self):
-        # 현재 z 위치와 목표 z 위치 비교
-        current_z = self.current_pose.position.z
-        if abs(current_z - self.target_z) < 0.005:  # 오차 허용 범위 5mm
-            self.get_logger().info(f'Target z={self.target_z} reached.')
-            self.target_reached = True
-            self.check_position_timer.cancel()
-            if self.step == 1:
-                self.step = 2
-                self.close_gripper()
-            elif self.step == 3:
-                self.step = 4
-                self.publish_convayor()
-
-    def close_gripper(self):
+    def move_gripper(self):
         self.get_logger().info('Closing the gripper.')
         self.tool_control_req.joint_position.joint_name = ['gripper']
         self.tool_control_req.joint_position.position = [-0.01]  # 그리퍼 완전 닫기
@@ -123,24 +109,16 @@ class MoveUpwardClient(Node):
         try:
             response = future.result()
             self.get_logger().info('Command to close gripper sent successfully.')
-            # 그리퍼가 닫혔는지 확인하기 위해 타이머 시작
-            self.target_gripper_position = -0.01
-            self.gripper_closed = False
-            self.check_gripper_timer = self.create_timer(0.1, self.check_gripper_position)
+            # 2초 대기 후 다음 단계로 이동
+            self.wait_timer = self.create_timer(2.0, self.timer_callback_move_z_up)
         except Exception as e:
             self.get_logger().error(f'Failed to send command to close gripper: {e}')
 
-    def check_gripper_position(self):
-        # 현재 그리퍼 위치와 목표 그리퍼 위치 비교
-        gripper_index = self.current_joint_states.name.index('gripper')
-        current_gripper_position = self.current_joint_states.position[gripper_index]
-        if abs(current_gripper_position - self.target_gripper_position) < 1:  # 오차 허용 범위
-            self.get_logger().info('Gripper closed successfully.')
-            self.gripper_closed = True
-            self.check_gripper_timer.cancel()
-            if self.step == 2:
-                self.step = 3
-                self.move_z_up()
+    def timer_callback_move_z_up(self):
+        self.move_z_up()
+        if self.wait_timer is not None:
+            self.wait_timer.cancel()
+            self.wait_timer = None
 
     def move_z_up(self):
         self.get_logger().info('Moving z to 0.15')
@@ -156,10 +134,20 @@ class MoveUpwardClient(Node):
             self.get_logger().info('Command to move z=0.15 sent successfully.')
             # 목표 위치에 도달했는지 확인하기 위해 타이머 시작
             self.target_z = 0.15
-            self.target_reached = False
+            self.step = 3
             self.check_position_timer = self.create_timer(0.1, self.check_position)
         except Exception as e:
             self.get_logger().error(f'Failed to send command to move z=0.15: {e}')
+
+    def check_position(self):
+        # 현재 z 위치와 목표 z 위치 비교
+        current_z = self.current_pose.position.z
+        if abs(current_z - self.target_z) < 0.005:  # 오차 허용 범위 5mm
+            self.get_logger().info(f'Target z={self.target_z} reached.')
+            self.check_position_timer.cancel()
+            if self.step == 3:
+                self.step = 4
+                self.publish_convayor()
 
     def publish_convayor(self):
         self.get_logger().info('Publishing to convayor topic.')

@@ -53,8 +53,12 @@ class MoveUpwardClient(Node):
         self.place_step = 0
 
         # 대기 타이머 변수 초기화
-        self.wait_timer = None
-        self.check_position_timer = None
+        self.wait_timer_pickup = None
+        self.check_position_timer_pickup = None
+        self.check_position_timer_pickup_up = None
+        self.check_position_timer_place1 = None
+        self.check_position_timer_place2 = None
+        self.wait_timer_place = None
 
         # 내려놓기 위한 목표 위치 설정 (절대 좌표값)
         self.place_pose1 = Pose()
@@ -115,6 +119,7 @@ class MoveUpwardClient(Node):
     def check_position_pickup(self):
         # 현재 z 위치와 목표 z 위치 비교
         current_z = self.current_pose.position.z
+        self.get_logger().debug(f'Pickup: Checking position_pickup: current_z={current_z}, target_z={self.target_z_pickup}')
         if abs(current_z - self.target_z_pickup) < 0.005:  # 오차 허용 범위 5mm
             self.get_logger().info(f'Pickup: Target z={self.target_z_pickup} reached.')
             self.check_position_timer_pickup.cancel()
@@ -143,6 +148,7 @@ class MoveUpwardClient(Node):
             self.pickup_step = 0  # 시퀀스 초기화
 
     def timer_callback_pickup_move_z_up(self):
+        self.get_logger().info('Pickup: Timer expired, moving z to 0.15')
         self.move_z_up_pickup()
         if self.wait_timer_pickup is not None:
             self.wait_timer_pickup.cancel()
@@ -150,8 +156,8 @@ class MoveUpwardClient(Node):
 
     # z를 0.15로 이동 (픽업 완료 후)
     def move_z_up_pickup(self):
-        self.get_logger().info('Pickup: Moving z to 0.05')
-        self.task_space_req.kinematics_pose.pose.position.z = 0.05
+        self.get_logger().info('Pickup: Moving z to 0.15')
+        self.task_space_req.kinematics_pose.pose.position.z = 0.15
         self.task_space_req.path_time = 1.0
 
         future = self.task_space_cli.call_async(self.task_space_req)
@@ -160,17 +166,18 @@ class MoveUpwardClient(Node):
     def move_z_up_pickup_callback(self, future):
         try:
             response = future.result()
-            self.get_logger().info('Pickup: Command to move z=0.05 sent successfully.')
+            self.get_logger().info('Pickup: Command to move z=0.15 sent successfully.')
             # 목표 위치에 도달했는지 확인하기 위해 타이머 시작
-            self.target_z_pickup_up = 0.05
+            self.target_z_pickup_up = 0.15
             self.check_position_timer_pickup_up = self.create_timer(0.1, self.check_position_pickup_up)
         except Exception as e:
-            self.get_logger().error(f'Pickup: Failed to send command to move z=0.05: {e}')
+            self.get_logger().error(f'Pickup: Failed to send command to move z=0.15: {e}')
             self.pickup_step = 0  # 시퀀스 초기화
 
     def check_position_pickup_up(self):
         # 현재 z 위치와 목표 z 위치 비교
         current_z = self.current_pose.position.z
+        self.get_logger().debug(f'Pickup: Checking position_pickup_up: current_z={current_z}, target_z={self.target_z_pickup_up}')
         if abs(current_z - self.target_z_pickup_up) < 0.005:  # 오차 허용 범위 5mm
             self.get_logger().info(f'Pickup: Target z={self.target_z_pickup_up} reached.')
             self.check_position_timer_pickup_up.cancel()
@@ -202,6 +209,7 @@ class MoveUpwardClient(Node):
     def check_position_place1(self):
         # 현재 z 위치와 목표 z 위치 비교
         current_z = self.current_pose.position.z
+        self.get_logger().debug(f'Place: Checking position_place1: current_z={current_z}, target_z={self.target_z_place1}')
         if abs(current_z - self.target_z_place1) < 0.005:  # 오차 허용 범위 5mm
             self.get_logger().info(f'Place: Target place pose 1 reached at z={self.target_z_place1}.')
             self.check_position_timer_place1.cancel()
@@ -233,6 +241,7 @@ class MoveUpwardClient(Node):
     def check_position_place2(self):
         # 현재 z 위치와 목표 z 위치 비교
         current_z = self.current_pose.position.z
+        self.get_logger().debug(f'Place: Checking position_place2: current_z={current_z}, target_z={self.target_z_place2}')
         if abs(current_z - self.target_z_place2) < 0.005:  # 오차 허용 범위 5mm
             self.get_logger().info(f'Place: Target place pose 2 reached at z={self.target_z_place2}.')
             self.check_position_timer_place2.cancel()

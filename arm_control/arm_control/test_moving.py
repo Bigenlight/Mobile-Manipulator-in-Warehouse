@@ -49,7 +49,7 @@ class MoveUpwardClient(Node):
         self.req.end_effector_name = 'gripper'
         self.req.kinematics_pose.pose.position.x = self.current_pose.position.x
         self.req.kinematics_pose.pose.position.y = self.current_pose.position.y
-        self.req.kinematics_pose.pose.position.z = self.current_pose.position.z - 0.05  # Move up by 0.01m
+        self.req.kinematics_pose.pose.position.z = self.current_pose.position.z + 0.01  # Move up by 0.01m
         self.req.kinematics_pose.pose.orientation = self.current_pose.orientation
         self.req.path_time = 0.5  # Adjust as needed
 

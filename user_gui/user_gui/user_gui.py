@@ -1,17 +1,26 @@
-# combined_gui.py
+#!/usr/bin/env python3
 
-import sys
-import threading
-import rclpy
-from rclpy.node import Node
-from rclpy.executors import MultiThreadedExecutor
+import os
+import cv2
 
+# After importing cv2, remove the QT_QPA_PLATFORM_PLUGIN_PATH if it's pointing to cv2's plugins
+cv2_plugins_path = os.path.join(os.path.dirname(cv2.__file__), 'qt', 'plugins')
+if os.environ.get('QT_QPA_PLATFORM_PLUGIN_PATH') == cv2_plugins_path:
+    del os.environ['QT_QPA_PLATFORM_PLUGIN_PATH']
+
+# Now import PyQt5 modules
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout,
     QSpinBox, QGroupBox, QMessageBox, QSizePolicy, QProgressBar
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QObject, pyqtSlot, QThread
 from PyQt5.QtGui import QImage, QPixmap, QFont
+
+import sys
+import threading
+import rclpy
+from rclpy.node import Node
+from rclpy.executors import MultiThreadedExecutor
 
 from std_msgs.msg import String, Bool, Int32
 from sensor_msgs.msg import CompressedImage
@@ -418,6 +427,32 @@ class MainWindow(QMainWindow):
         self.send_button.setFixedSize(100, 40)
         self.job_layout.addWidget(self.send_button, alignment=Qt.AlignCenter)
 
+        # --- Adding New Job Buttons ---
+        # Create a horizontal layout for predefined job buttons
+        job_buttons_layout = QHBoxLayout()
+
+        # Job1 Button
+        self.job1_button = QPushButton('Job1: r=2, b=1, g=1')
+        self.job1_button.setFixedSize(200, 40)
+        self.job1_button.clicked.connect(lambda: self.send_predefined_order(2, 1, 1))
+        job_buttons_layout.addWidget(self.job1_button)
+
+        # Job2 Button
+        self.job2_button = QPushButton('Job2: r=1, b=2, g=2')
+        self.job2_button.setFixedSize(200, 40)
+        self.job2_button.clicked.connect(lambda: self.send_predefined_order(1, 2, 2))
+        job_buttons_layout.addWidget(self.job2_button)
+
+        # Job3 Button
+        self.job3_button = QPushButton('Job3: r=1, b=0, g=3')
+        self.job3_button.setFixedSize(200, 40)
+        self.job3_button.clicked.connect(lambda: self.send_predefined_order(1, 0, 3))
+        job_buttons_layout.addWidget(self.job3_button)
+
+        # Add the job buttons layout to the job_layout
+        self.job_layout.addLayout(job_buttons_layout)
+        # --- End of New Job Buttons ---
+
         # Control layout (manual control buttons and conveyor control)
         self.control_group = QGroupBox("수동 조종")
         self.control_layout = QVBoxLayout()
@@ -698,6 +733,16 @@ class MainWindow(QMainWindow):
     def update_operation_time(self):
         self.elapsed_time += 1
         self.operation_time_label.setText(f"작동 시간: {self.elapsed_time}초")
+
+    # --- New Method to Send Predefined Orders ---
+    def send_predefined_order(self, red, blue, goto):
+        order_str = f'red_box:{red},blue_box:{blue},goto_goal:{goto}'
+        msg = String()
+        msg.data = order_str
+        self.order_publisher.publish(msg)
+        self.manipulation_node.get_logger().info(f'Published predefined order to /order: {order_str}')
+    # --- End of New Method ---
+
 def main():
     load_dotenv()  # Load .env file if present
 

@@ -90,6 +90,12 @@ class OrderManager(Node):
         self.get_logger().info(f"Received /load_on_conveyor: {msg.data}")
         if msg.data.strip().lower() == 'done' and self.waiting_for_load_done:
             self.waiting_for_load_done = False
+            
+            state_msg = Int32()
+            state_msg.data = 4
+            self.state_pub.publish(state_msg)
+            self.get_logger().info("Published /state: 4")
+            
             # Process the next order
             self.process_next_order()
 

@@ -93,8 +93,8 @@ class MoveUpwardClient(Node):
 
         # 새로운 목표 포즈 설정
         self.req.end_effector_name = 'gripper'  # 매니퓰레이터의 엔드 이펙터 이름으로 변경 필요
-        self.req.kinematics_pose.pose.position.x = self.current_pose.position.x + dx
-        self.req.kinematics_pose.pose.position.y = self.current_pose.position.y + dy
+        self.req.kinematics_pose.pose.position.x = self.current_pose.position.x + dy
+        self.req.kinematics_pose.pose.position.y = self.current_pose.position.y + dx
         self.req.kinematics_pose.pose.position.z = self.fixed_z  # Z축을 0.11로 고정
         self.req.kinematics_pose.pose.orientation = self.current_pose.orientation  # 방향 동일하게 유지
         self.req.path_time = 0.5  # 경로 이동 시간 (필요에 따라 조정)

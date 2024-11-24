@@ -28,6 +28,8 @@ setup(
         'console_scripts': [
             'test_moving = arm_control.test_moving:main',
             'moving = arm_control.moving:main',
+            'catch = arm_control.catch:main',
+            'test_catch = arm_control.test_catch:main'
         ],
     },
 )

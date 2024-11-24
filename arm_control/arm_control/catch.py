@@ -7,6 +7,7 @@ from open_manipulator_msgs.msg import KinematicsPose
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
 from std_msgs.msg import Empty, String  # Imported String
+import time
 
 class MoveUpwardClient(Node):
     def __init__(self):
@@ -129,7 +130,7 @@ class MoveUpwardClient(Node):
         # 현재 z 위치와 목표 z 위치 비교
         current_z = self.current_pose.position.z
         self.get_logger().debug(f'Pickup: Checking position_pickup: current_z={current_z}, target_z={self.target_z_pickup}')
-        if abs(current_z - self.target_z_pickup) < 0.01:  # 오차 허용 범위 1cm
+        if abs(current_z - self.target_z_pickup) < 0.03:  # 오차 허용 범위 1cm
             self.get_logger().info(f'Pickup: Target z={self.target_z_pickup} reached.')
             self.timer.cancel()
             self.timer = None
@@ -161,7 +162,7 @@ class MoveUpwardClient(Node):
 
     # z를 0.05로 이동 (픽업 완료 후)
     def move_z_up_pickup(self):
-        self.get_logger().info('Pickup: Moving z to 0.15')
+        self.get_logger().info('Pickup: Moving z to 0.05')
         self.timer.cancel()
         self.timer = None
 
@@ -169,7 +170,7 @@ class MoveUpwardClient(Node):
         task_space_req.end_effector_name = 'gripper'
         task_space_req.kinematics_pose.pose.position.x = self.current_pose.position.x
         task_space_req.kinematics_pose.pose.position.y = self.current_pose.position.y
-        task_space_req.kinematics_pose.pose.position.z = 0.15  # Increased Z value
+        task_space_req.kinematics_pose.pose.position.z = 0.05  # Increased Z value
         task_space_req.kinematics_pose.pose.orientation = self.current_pose.orientation
         task_space_req.path_time = 1.0
 
@@ -180,17 +181,20 @@ class MoveUpwardClient(Node):
     def move_z_up_pickup_callback(self, future):
         try:
             response = future.result()
-            self.get_logger().info('Pickup: Command to move z=0.15 sent successfully.')
-            self.target_z_pickup_up = 0.15  # Updated target Z
+            self.get_logger().info('Pickup: Command to move z=0.05 sent successfully.')
+            self.target_z_pickup_up = 0.05  # Updated target Z
+            
+            time.sleep(0.5)  # 슬립 추가
+            
             self.timer = self.create_timer(0.1, self.check_position_pickup_up)
         except Exception as e:
-            self.get_logger().error(f'Pickup: Failed to send command to move z=0.15: {e}')
+            self.get_logger().error(f'Pickup: Failed to send command to move z=0.05: {e}')
             self.reset_steps()
 
     def check_position_pickup_up(self):
         current_z = self.current_pose.position.z
         self.get_logger().info(f'Pickup: Checking position_pickup_up: current_z={current_z}, target_z={self.target_z_pickup_up}')
-        if abs(current_z - self.target_z_pickup_up) < 0.005:
+        if abs(current_z - self.target_z_pickup_up) < 0.05:
             self.get_logger().info(f'Pickup: Target z={self.target_z_pickup_up} reached.')
             self.timer.cancel()
             self.timer = None
@@ -206,8 +210,11 @@ class MoveUpwardClient(Node):
         task_space_req.kinematics_pose.pose = self.place_pose1
         task_space_req.path_time = 2.0  # 이동 시간 설정 (초 단위)
 
+        time.sleep(1)  # 슬립 추가
+        
         self.get_logger().debug(f'Place: Sending move_to_place_pose1 request: {task_space_req}')
         future = self.task_space_cli.call_async(task_space_req)
+        time.sleep(0.5)
         future.add_done_callback(self.move_to_place_pose1_callback)
 
     def move_to_place_pose1_callback(self, future):
@@ -244,6 +251,8 @@ class MoveUpwardClient(Node):
         tool_control_req.joint_position.position = [0.01]  # 그리퍼 완전 열기
         tool_control_req.path_time = 1.0
 
+        time.sleep(1)  # 슬립 추가
+        
         self.get_logger().debug(f'Place: Sending open_gripper request: {tool_control_req}')
         future = self.tool_control_cli.call_async(tool_control_req)
         future.add_done_callback(self.open_gripper_callback)
@@ -268,6 +277,8 @@ class MoveUpwardClient(Node):
         task_space_req.kinematics_pose.pose = self.place_pose3
         task_space_req.path_time = 2.0  # 이동 시간 설정 (초 단위)
 
+        time.sleep(1)  # 슬립 추가
+        
         self.get_logger().debug(f'Place: Sending move_to_place_pose3 request: {task_space_req}')
         future = self.task_space_cli.call_async(task_space_req)
         future.add_done_callback(self.move_to_place_pose3_callback)
@@ -287,7 +298,7 @@ class MoveUpwardClient(Node):
         # 현재 z 위치와 목표 z 위치 비교
         current_z = self.current_pose.position.z
         self.get_logger().debug(f'Place: Checking position_place3: current_z={current_z}, target_z={self.target_z_place3}')
-        if abs(current_z - self.target_z_place3) < 0.01:  # 오차 허용 범위 1cm
+        if abs(current_z - self.target_z_place3) < 0.03:  # 오차 허용 범위 1cm
             self.get_logger().info(f'Place: Target place pose 3 reached at z={self.target_z_place3}.')
             self.timer.cancel()
             self.timer = None
@@ -303,6 +314,8 @@ class MoveUpwardClient(Node):
         task_space_req.kinematics_pose.pose = self.place_pose2
         task_space_req.path_time = 2.0  # 이동 시간 설정 (초 단위)
 
+        time.sleep(1)  # 슬립 추가
+        
         self.get_logger().debug(f'Place: Sending move_to_place_pose2 request: {task_space_req}')
         future = self.task_space_cli.call_async(task_space_req)
         future.add_done_callback(self.move_to_place_pose2_callback)
@@ -322,7 +335,7 @@ class MoveUpwardClient(Node):
         # 현재 z 위치와 목표 z 위치 비교
         current_z = self.current_pose.position.z
         self.get_logger().debug(f'Place: Checking position_place2: current_z={current_z}, target_z={self.target_z_place2}')
-        if abs(current_z - self.target_z_place2) < 0.01:  # 오차 허용 범위 1cm
+        if abs(current_z - self.target_z_place2) < 0.03:  # 오차 허용 범위 1cm
             self.get_logger().info(f'Place: Target place pose 2 reached at z={self.target_z_place2}.')
             self.timer.cancel()
             self.timer = None
@@ -338,7 +351,9 @@ class MoveUpwardClient(Node):
         self.timer.cancel()
         self.timer = None
         self.reset_steps()
-
+        
+        time.sleep(1)  # 슬립 추가
+        
         # Publish 'done' message to /load_on_conveyor
         done_msg = String()
         done_msg.data = 'done'

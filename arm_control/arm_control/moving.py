@@ -90,7 +90,7 @@ class MoveUpwardClient(Node):
         self.req.kinematics_pose.pose.position.x = self.current_pose.position.x + dy
         self.req.kinematics_pose.pose.position.y = self.current_pose.position.y + dx
         self.req.kinematics_pose.pose.position.z = self.current_pose.position.z  # z는 동일하게 유지
-        self.req.kinematics_pose.pose.orientation = 0.11  # 방향 동일하게 유지
+        self.req.kinematics_pose.pose.orientation = self.current_pose.orientation  # 방향 동일하게 유지
         self.req.path_time = 0.5  # 경로 이동 시간 (필요에 따라 조정)
 
         self.get_logger().info(f'목표 포즈 설정: x={self.req.kinematics_pose.pose.position.x}, y={self.req.kinematics_pose.pose.position.y}, z={self.req.kinematics_pose.pose.position.z}')

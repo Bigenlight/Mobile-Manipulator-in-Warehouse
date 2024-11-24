@@ -8,9 +8,6 @@ setup(
     name=package_name,
     version='0.0.1',
     packages=[package_name],
-    py_modules=[
-        'test_moving',
-    ],
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -29,7 +26,8 @@ setup(
             'test_moving = arm_control.test_moving:main',
             'moving = arm_control.moving:main',
             'catch = arm_control.catch:main',
-            'test_catch = arm_control.test_catch:main'
+            'test_catch = arm_control.test_catch:main',
+            'order_manager = arm_control.order_manager:main',
         ],
     },
 )

@@ -46,8 +46,8 @@ class MoveUpwardClient(Node):
         self.target_y = 240  # 예시 값, 필요에 따라 수정 가능
 
         # 상수 선언
-        self.kx = -0.0304
-        self.ky = 0.0304
+        self.kx = -0.0003328895
+        self.ky = -0.0003328895
 
         self.get_logger().info('MoveUpwardClient 노드가 시작되었습니다.')
 
@@ -73,8 +73,8 @@ class MoveUpwardClient(Node):
         self.get_logger().debug(f'p_dx={p_dx}, p_dy={p_dy}')
 
         # dx와 dy 계산
-        dx = self.kx * p_x
-        dy = self.ky * p_y
+        dx = self.kx * p_dx
+        dy = self.ky * p_dy
         self.get_logger().debug(f'dx={dx}, dy={dy}')
 
         # 현재 포즈가 수신되었는지 확인
@@ -87,10 +87,10 @@ class MoveUpwardClient(Node):
 
         # 새로운 목표 포즈 설정
         self.req.end_effector_name = 'gripper'  # 매니퓰레이터의 엔드 이펙터 이름으로 변경 필요
-        self.req.kinematics_pose.pose.position.x = self.current_pose.position.x + dx
-        self.req.kinematics_pose.pose.position.y = self.current_pose.position.y + dy
+        self.req.kinematics_pose.pose.position.x = self.current_pose.position.x + dy
+        self.req.kinematics_pose.pose.position.y = self.current_pose.position.y + dx
         self.req.kinematics_pose.pose.position.z = self.current_pose.position.z  # z는 동일하게 유지
-        self.req.kinematics_pose.pose.orientation = self.current_pose.orientation  # 방향 동일하게 유지
+        self.req.kinematics_pose.pose.orientation = 0.11  # 방향 동일하게 유지
         self.req.path_time = 0.5  # 경로 이동 시간 (필요에 따라 조정)
 
         self.get_logger().info(f'목표 포즈 설정: x={self.req.kinematics_pose.pose.position.x}, y={self.req.kinematics_pose.pose.position.y}, z={self.req.kinematics_pose.pose.position.z}')

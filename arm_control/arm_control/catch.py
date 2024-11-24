@@ -150,7 +150,7 @@ class MoveUpwardClient(Node):
     # z를 0.15로 이동 (픽업 완료 후)
     def move_z_up(self):
         self.get_logger().info('Moving z to 0.15')
-        self.task_space_req.kinematics_pose.pose.position.z = 0.15
+        self.task_space_req.kinematics_pose.pose.position.z = 0.07
         self.task_space_req.path_time = 1.0
 
         future = self.task_space_cli.call_async(self.task_space_req)

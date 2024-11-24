@@ -2,7 +2,7 @@
 <package format="3">
   <name>camera</name>
   <version>0.0.0</version>
-  <description>Package that streams video from webcam</description>
+  <description>Package that streams video from webcam and processes images with ArUco detection.</description>
   <maintainer email="your_email@example.com">Your Name</maintainer>
   <license>Apache License 2.0</license>
 
@@ -13,6 +13,7 @@
   <depend>cv_bridge</depend>
 
   <exec_depend>opencv-python</exec_depend>
+  <exec_depend>opencv-contrib-python</exec_depend> <!-- Added this line -->
   <exec_depend>numpy</exec_depend>
 
   <export>

@@ -20,7 +20,7 @@ def main():
     detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
 
     # 카메라 초기화 (기본 카메라 0번)
-    cap = cv2.VideoCapture(4)
+    cap = cv2.VideoCapture(0)
 
     if not cap.isOpened():
         print("카메라를 열 수 없습니다.")

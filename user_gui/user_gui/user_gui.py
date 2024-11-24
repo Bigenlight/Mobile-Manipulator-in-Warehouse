@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout,
     QSpinBox, QGroupBox, QMessageBox, QSizePolicy, QProgressBar
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QObject, pyqtSlot, QThread
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QObject, pyqtSlot
 from PyQt5.QtGui import QImage, QPixmap, QFont
 
 import sys
@@ -21,60 +21,24 @@ import threading
 import rclpy
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
+from sensor_msgs.msg import Image, CompressedImage
 
 from std_msgs.msg import String, Bool, Int32
-from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge
 
-import cv2
 import numpy as np
 import time
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import os
-from dotenv import load_dotenv  # Python용 dotenv 가져오기
+from dotenv import load_dotenv  # For dotenv in Python
 import re  # Added for email validation
 
 # --- Communicator class for signal passing ---
 class Communicator(QObject):
     error_signal = pyqtSignal(str)  # Signal to pass error messages
     state_signal = pyqtSignal(int)  # Signal to pass state updates
-
-# --- VideoThread for video streaming ---
-class VideoThread(QThread):
-    change_pixmap_signal = pyqtSignal(QImage)
-
-    def __init__(self, source=0, parent=None):
-        super().__init__(parent)
-        self.source = source
-        self._run_flag = True
-
-    def run(self):
-        # Open video source
-        cap = cv2.VideoCapture(self.source)
-        if not cap.isOpened():
-            self.change_pixmap_signal.emit(QImage())  # Emit empty image on failure
-            self.parent().get_logger().error(f"Cannot open camera with index {self.source}")
-            return
-        while self._run_flag:
-            ret, cv_img = cap.read()
-            if ret:
-                # Convert to RGB
-                cv_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-                height, width, channel = cv_img.shape
-                bytes_per_line = 3 * width
-                qt_img = QImage(cv_img.data, width, height, bytes_per_line, QImage.Format_RGB888)
-                # Emit signal
-                self.change_pixmap_signal.emit(qt_img)
-            else:
-                self.parent().get_logger().warning(f"Failed to read frame from camera {self.source}")
-        # Release video source
-        cap.release()
-
-    def stop(self):
-        self._run_flag = False
-        self.wait()
 
 # --- ROS2 Nodes ---
 class ManipulationPublisherNode(Node):
@@ -104,31 +68,8 @@ class ManipulationListenerNode(Node):
     def listener_callback(self, msg):
         message = msg.data
         self.get_logger().info(f"Received message: {message}")
-
         # Perform actions based on message
-        if message == "play":
-            self.get_logger().info("Play command received. Executing 'play' action.")
-            # Add actual action code here
-        elif message == "stop":
-            self.get_logger().info("Stop command received. Executing 'stop' action.")
-            # Add actual action code here
-        elif message == "pause":
-            self.get_logger().info("Pause command received. Executing 'pause' action.")
-            # Add actual action code here
-        elif message == "resume":
-            self.get_logger().info("Resume command received. Executing 'resume' action.")
-            # Add actual action code here
-        elif message == "reset":
-            self.get_logger().info("Reset command received. Executing 'reset' action.")
-            # Add actual action code here
-        elif message == "conveyor_on":
-            self.get_logger().info("Conveyor ON command received. Turning the conveyor ON.")
-            # Add actual action code here
-        elif message == "conveyor_off":
-            self.get_logger().info("Conveyor OFF command received. Turning the conveyor OFF.")
-            # Add actual action code here
-        else:
-            self.get_logger().warning(f"Unknown command received: {message}")
+        # Add your action handling code here
 
 class ErrorSubscriberNode(Node):
     def __init__(self, email_config, communicator: Communicator):
@@ -147,7 +88,6 @@ class ErrorSubscriberNode(Node):
     def listener_callback(self, msg):
         error_message = msg.data
         self.get_logger().error(f'Received error message: {error_message}')
-
         # Check if receiver_email is valid
         if not self.validate_email(self.email_config['receiver_email']):
             # Set to default email
@@ -155,7 +95,6 @@ class ErrorSubscriberNode(Node):
             self.email_config['receiver_email'] = default_email
             # Emit a signal to inform GUI
             self.communicator.error_signal.emit(f"Invalid or no receiver email. Email will be sent to {default_email}.")
-
         # Send email in a separate thread
         threading.Thread(target=self.send_email, args=(error_message,), daemon=True).start()
         # Emit error_signal with the error message
@@ -250,7 +189,6 @@ class LoginWindow(QWidget):
     def handle_login(self):
         username = self.input_username.text()
         password = self.input_password.text()
-
         # Simple username and password check
         if username == 'rokey' and password == 'rokey':
             QMessageBox.information(self, 'Login', 'Login Successful!')
@@ -266,7 +204,9 @@ class LoginWindow(QWidget):
 
 # --- MainWindow class ---
 class MainWindow(QMainWindow):
-    image_received_signal = pyqtSignal(QImage)  # Signal to update the image in the GUI
+    # Signals
+    image_received_signal = pyqtSignal(QImage)       # For /image_topic, updates image_label
+    aruco_image_received_signal = pyqtSignal(QImage)  # For /image_aruco, updates video_label
 
     def __init__(self, manipulation_node: ManipulationPublisherNode, communicator: Communicator, email_config: dict):
         super().__init__()
@@ -278,7 +218,7 @@ class MainWindow(QMainWindow):
 
         # Initialize operation time variables
         self.operation_timer = QTimer()
-        self.operation_timer.timeout.connect(self.update_operation_time)  # 연결
+        self.operation_timer.timeout.connect(self.update_operation_time)
         self.start_time = None
         self.elapsed_time = 0  # in seconds
 
@@ -298,7 +238,8 @@ class MainWindow(QMainWindow):
         )
         self.belt_publisher = self.manipulation_node.create_publisher(Bool, '/belt', qos_profile=qos_belt)
 
-        # Subscriber for /image_topic
+        # Subscriptions
+        # Subscriber for /image_topic (existing functionality)
         self.image_subscription = self.manipulation_node.create_subscription(
             CompressedImage,
             '/image_topic',
@@ -306,8 +247,17 @@ class MainWindow(QMainWindow):
             10)
         self.image_subscription  # Prevent unused variable warning
 
-        # Connect the signal to the slot
+        # Subscriber for /image_aruco (new subscription)
+        self.aruco_image_subscription = self.manipulation_node.create_subscription(
+            Image,
+            '/image_aruco',
+            self.aruco_image_callback,
+            10)
+        self.aruco_image_subscription  # Prevent unused variable warning
+
+        # Connect signals to slots
         self.image_received_signal.connect(self.update_image_label)
+        self.aruco_image_received_signal.connect(self.update_video_label)
 
         # Connect communicator signals
         self.communicator.state_signal.connect(self.update_loading_bar)
@@ -331,7 +281,7 @@ class MainWindow(QMainWindow):
         self.left_layout = QVBoxLayout()
         self.bottom_layout.addLayout(self.left_layout)
 
-        # Real-time webcam video display
+        # Video display label (now displaying /image_aruco)
         self.video_label = QLabel(self)
         self.video_label.setFixedSize(640, 480)  # Fixed size
         self.video_label.setStyleSheet("border: 1px solid black;")
@@ -360,13 +310,13 @@ class MainWindow(QMainWindow):
         self.operation_time_label = QLabel("작동 시간: 0초", self)
         self.operation_time_label.setAlignment(Qt.AlignCenter)
         self.operation_time_label.setStyleSheet("font-size: 14px;")
-        self.loading_layout.addWidget(self.operation_time_label)  # 새 QLabel 추가
+        self.loading_layout.addWidget(self.operation_time_label)  # New QLabel added
 
         # Right side: Job list and controls
         self.right_layout = QVBoxLayout()
         self.bottom_layout.addLayout(self.right_layout)
 
-        # Image display label (replacing Yolo Start Image placeholder)
+        # Image display label (from /image_topic)
         self.image_label = QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
         self.image_label.setText("No image received")
@@ -380,7 +330,6 @@ class MainWindow(QMainWindow):
         self.right_layout.addWidget(self.job_group)
 
         # Clear existing job_layout contents
-        # (If there were any existing widgets, remove them)
         for i in reversed(range(self.job_layout.count())):
             item = self.job_layout.itemAt(i)
             if item.widget():
@@ -483,7 +432,7 @@ class MainWindow(QMainWindow):
         self.reset_button.setFixedSize(100, 50)
         self.manual_controls_layout.addWidget(self.reset_button)
 
-        # Conveyor control buttons (replacing with On/Off buttons from original user_gui)
+        # Conveyor control buttons
         self.conveyor_group = QGroupBox("컨베이어 조작")
         self.conveyor_layout = QHBoxLayout()
         self.conveyor_group.setLayout(self.conveyor_layout)
@@ -560,11 +509,6 @@ class MainWindow(QMainWindow):
         self.resume_button.clicked.connect(self.resume_job)
         self.reset_button.clicked.connect(self.reset_job)
 
-        # Start video thread
-        self.video_thread = VideoThread()
-        self.video_thread.change_pixmap_signal.connect(self.update_video_image)
-        self.video_thread.start()
-
     def clear_layout(self, layout):
         if layout is not None:
             while layout.count():
@@ -580,7 +524,7 @@ class MainWindow(QMainWindow):
             np_arr = np.frombuffer(msg.data, np.uint8)
             cv_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
             if cv_image is None:
-                self.manipulation_node.get_logger().error("Received empty image")
+                self.manipulation_node.get_logger().error("Received empty image from /image_topic")
                 return
 
             # Convert OpenCV image (BGR) to RGB format
@@ -594,18 +538,46 @@ class MainWindow(QMainWindow):
             # Emit the signal to update the image in the GUI
             self.image_received_signal.emit(q_image)
         except Exception as e:
-            self.manipulation_node.get_logger().error(f"Could not convert image: {e}")
+            self.manipulation_node.get_logger().error(f"Could not convert image from /image_topic: {e}")
+
+    def aruco_image_callback(self, msg):
+        try:
+            # Convert ROS Image message to OpenCV image
+            cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+            if cv_image is None:
+                self.manipulation_node.get_logger().error("Received empty image from /image_aruco")
+                return
+
+            # Convert OpenCV image (BGR) to RGB format
+            cv_image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+            height, width, channel = cv_image_rgb.shape
+            bytes_per_line = 3 * width
+
+            # Convert to QImage
+            q_image = QImage(cv_image_rgb.data, width, height, bytes_per_line, QImage.Format_RGB888)
+
+            # Emit the signal to update the video_label in the GUI
+            self.aruco_image_received_signal.emit(q_image)
+        except Exception as e:
+            self.manipulation_node.get_logger().error(f"Could not convert image from /image_aruco: {e}")
 
     def update_image_label(self, q_image):
+        if q_image.isNull():
+            self.image_label.setText("Failed to load image.")
+            return
         # Update the image_label with the new image
         pixmap = QPixmap.fromImage(q_image)
         pixmap = pixmap.scaled(self.image_label.width(), self.image_label.height(), Qt.KeepAspectRatio)
         self.image_label.setPixmap(pixmap)
 
-    def update_video_image(self, qt_img):
-        # Update the video_label with the new image
-        self.video_label.setPixmap(QPixmap.fromImage(qt_img).scaled(
-            self.video_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+    def update_video_label(self, q_image):
+        if q_image.isNull():
+            self.video_label.setText("Failed to load image.")
+            return
+        # Update the video_label with the new image from /image_aruco
+        pixmap = QPixmap.fromImage(q_image)
+        pixmap = pixmap.scaled(self.video_label.width(), self.video_label.height(), Qt.KeepAspectRatio)
+        self.video_label.setPixmap(pixmap)
 
     def send_order(self):
         red_value = self.red_spinbox.value()
@@ -660,8 +632,7 @@ class MainWindow(QMainWindow):
         self.manipulation_node.publish_command(command)
 
     def closeEvent(self, event):
-        """Close the window and stop threads"""
-        self.video_thread.stop()
+        """Close the window and clean up"""
         event.accept()
 
     def update_loading_bar(self, state):
@@ -690,6 +661,7 @@ class MainWindow(QMainWindow):
                 self.elapsed_time = 0
                 self.operation_time_label.setText(f"작동 시간: {self.elapsed_time}초")
                 self.operation_timer.stop()
+                self.start_time = None
 
             if state == 1 and self.start_time is None:
                 # Start operation timer on first state change (state 1)
@@ -767,16 +739,12 @@ def main():
     error_subscriber_node = ErrorSubscriberNode(email_config, communicator)
     state_subscriber_node = StateSubscriberNode(communicator)
 
-    # Create a generic ROS2 node for MainWindow
-    ros_node = Node('simple_order_gui_node')
-
     # Create an executor and add all nodes
     executor = MultiThreadedExecutor()
     executor.add_node(manipulation_node)
     executor.add_node(manipulation_listener_node)
     executor.add_node(error_subscriber_node)
     executor.add_node(state_subscriber_node)
-    executor.add_node(ros_node)  # Add the node used in MainWindow
 
     # Create and start ROS spinning in a separate thread
     def spin_executor():
@@ -804,7 +772,6 @@ def main():
     manipulation_listener_node.destroy_node()
     error_subscriber_node.destroy_node()
     state_subscriber_node.destroy_node()
-    ros_node.destroy_node()
     rclpy.shutdown()
 
     sys.exit(exit_code)

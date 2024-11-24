@@ -20,6 +20,7 @@ setup(
         'opencv-python',
         'numpy',
         'python-dotenv',
+        'cv_bridge',  # Added cv_bridge
     ],
     zip_safe=True,
     maintainer='Your Name',

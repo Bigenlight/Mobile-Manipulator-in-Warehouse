@@ -27,6 +27,7 @@ setup(
     entry_points={
         'console_scripts': [
             'test_moving = arm_control.test_moving:main',
+            'moving = arm_control.moving:main',
         ],
     },
 )

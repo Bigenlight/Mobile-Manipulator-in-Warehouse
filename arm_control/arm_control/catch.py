@@ -289,6 +289,7 @@ class MoveUpwardClient(Node):
         self.get_logger().debug(f'Place: Sending open_gripper request: {tool_control_req}')
         future = self.tool_control_cli.call_async(tool_control_req)
         future.add_done_callback(self.open_gripper_callback)
+        time.sleep(0.5)
 
     def open_gripper_callback(self, future):
         try:

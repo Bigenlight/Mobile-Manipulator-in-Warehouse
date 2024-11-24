@@ -10,12 +10,18 @@ class OrderManager(Node):
         # Publishers
         self.target_box_pub = self.create_publisher(String, '/target_box', 10)
         self.state_pub = self.create_publisher(Int32, '/state', 10)
+        self.error_pub = self.create_publisher(String, '/error', 10)  # New Publisher
+
         # Subscribers
         self.order_sub = self.create_subscription(String, '/order', self.order_callback, 10)
         self.load_on_conveyor_sub = self.create_subscription(String, '/load_on_conveyor', self.load_on_conveyor_callback, 10)
+        self.count_box_sub = self.create_subscription(String, '/count_box', self.count_box_callback, 10)  # New Subscriber
+
         # Internal variables
         self.current_order = []
         self.waiting_for_load_done = False
+        self.available_red = 0  # Available red boxes
+        self.available_blue = 0  # Available blue boxes
 
         # Define job mappings
         self.job_mappings = {
@@ -23,6 +29,29 @@ class OrderManager(Node):
             'Job2': {'red': 1, 'blue': 2},
             'Job3': {'red': 1, 'blue': 0}
         }
+
+    def count_box_callback(self, msg):
+        """
+        Callback to update the available red and blue boxes based on /count_box topic.
+        Expected message format: 'red_count:3,blue_count:0'
+        """
+        self.get_logger().info(f"Received /count_box: {msg.data}")
+        try:
+            data = msg.data.strip()
+            parts = data.split(',')
+            for part in parts:
+                key, value = part.split(':')
+                key = key.strip().lower()
+                value = int(value.strip())
+                if key == 'red_count':
+                    self.available_red = value
+                elif key == 'blue_count':
+                    self.available_blue = value
+                else:
+                    self.get_logger().warn(f"Unknown key '{key}' in /count_box message.")
+            self.get_logger().info(f"Updated counts - Red: {self.available_red}, Blue: {self.available_blue}")
+        except Exception as e:
+            self.get_logger().error(f"Failed to parse /count_box message: {e}")
 
     def order_callback(self, msg):
         self.get_logger().info(f"Received order: {msg.data}")
@@ -60,9 +89,24 @@ class OrderManager(Node):
                 self.get_logger().error(f"Failed to parse order: {e}")
                 return
 
+        # Validate if there are enough boxes
+        if red_box_count > self.available_red or blue_box_count > self.available_blue:
+            self.get_logger().warn("Insufficient boxes to fulfill the order.")
+            error_msg = String()
+            error_msg.data = 'There are not enough boxes'
+            self.error_pub.publish(error_msg)
+            self.get_logger().info("Published to /error: 'There are not enough boxes'")
+            return  # Do not process the order
+
         # Prepare the current order list: reds first, then blues
         self.current_order = ['red'] * red_box_count + ['blue'] * blue_box_count
         self.get_logger().info(f"Current order list: {self.current_order}")
+
+        # Optionally, update available counts
+        self.available_red -= red_box_count
+        self.available_blue -= blue_box_count
+        self.get_logger().info(f"Updated available counts - Red: {self.available_red}, Blue: {self.available_blue}")
+
         # Overwrite any previous processing
         self.waiting_for_load_done = False
         # Start processing the new order
@@ -90,12 +134,12 @@ class OrderManager(Node):
         self.get_logger().info(f"Received /load_on_conveyor: {msg.data}")
         if msg.data.strip().lower() == 'done' and self.waiting_for_load_done:
             self.waiting_for_load_done = False
-            
+
             state_msg = Int32()
             state_msg.data = 4
             self.state_pub.publish(state_msg)
             self.get_logger().info("Published /state: 4")
-            
+
             # Process the next order
             self.process_next_order()
 

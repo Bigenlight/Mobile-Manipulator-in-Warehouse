@@ -2,7 +2,7 @@
 
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CompressedImage
 from std_msgs.msg import String
 from cv_bridge import CvBridge
 import cv2
@@ -33,6 +33,9 @@ class ImageSubscriber(Node):
 
         # Publisher for 'pixel_coord' topic (as String)
         self.pixel_publisher = self.create_publisher(String, 'pixel_coord', 10)
+
+        # Publisher for 'count_box' topic (as String)
+        self.count_publisher = self.create_publisher(String, 'count_box', 10)
 
         self.bridge = CvBridge()
         self.latest_ros_frame = None
@@ -85,11 +88,28 @@ class ImageSubscriber(Node):
             self.target_color = color
             self.tracking_active = True
             self.get_logger().info(f"Started tracking '{self.target_color}' boxes.")
+            self.publish_current_image()
         elif color == 'done':
             self.tracking_active = False
             self.get_logger().info("Stopped tracking boxes.")
+            self.publish_current_image()
         else:
             self.get_logger().warning(f"Received unknown command: '{msg.data}'")
+
+    def publish_current_image(self):
+        with self.lock_image:
+            if self.latest_ros_frame is not None:
+                # Convert OpenCV image to ROS CompressedImage message
+                try:
+                    compressed_msg = self.bridge.cv2_to_compressed_imgmsg(self.latest_ros_frame)
+                    compressed_msg.header.stamp = self.get_clock().now().to_msg()
+                    compressed_msg.format = "jpeg"
+                    self.image_publisher.publish(compressed_msg)
+                    self.get_logger().info("Published current image to '/image_topic'.")
+                except Exception as e:
+                    self.get_logger().error(f"Failed to publish image: {e}")
+            else:
+                self.get_logger().warning("No image available to publish.")
 
     def display_images(self):
         while rclpy.ok():
@@ -102,6 +122,10 @@ class ImageSubscriber(Node):
                     try:
                         # Use YOLOv8 tracking
                         results = self.model.track(frame, persist=True, verbose=False)
+
+                        # Initialize counts
+                        red_count = 0
+                        blue_count = 0
 
                         # Initialize variables to select the box with the smallest Track ID
                         selected_box = None
@@ -147,13 +171,25 @@ class ImageSubscriber(Node):
                                     f"Coordinates: ({x1}, {y1}), ({x2}, {y2}), Center: ({center_x:.1f}, {center_y:.1f})"
                                 )
 
+                                # Increment counts
+                                if class_name.lower() == 'red':
+                                    red_count += 1
+                                elif class_name.lower() == 'blue':
+                                    blue_count += 1
+
                                 # Check if tracking is active and box matches target color
                                 if self.tracking_active and class_name.lower() == self.target_color:
                                     if track_id != -1 and track_id < min_track_id:
                                         min_track_id = track_id
                                         selected_box = {'center_x': center_x, 'center_y': center_y}
 
-                        # After processing all boxes, publish the center coordinates if tracking is active
+                        # Publish the counts
+                        count_msg = String()
+                        count_msg.data = f'red_count:{red_count},blue_count:{blue_count}'
+                        self.count_publisher.publish(count_msg)
+                        self.get_logger().info(f"Published counts: {count_msg.data}")
+
+                        # Publish the center coordinates if tracking is active
                         if self.tracking_active and selected_box is not None:
                             coord_str = f"({selected_box['center_x']:.1f},{selected_box['center_y']:.1f})"
                             pixel_msg = String()

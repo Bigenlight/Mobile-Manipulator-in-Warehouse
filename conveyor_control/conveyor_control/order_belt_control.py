@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Bool, Int32
+from std_msgs.msg import Bool, Int32, String
 import serial
 import time
 
@@ -47,6 +47,9 @@ class OrderBeltControl(Node):
 
         self.state_subscription  # Prevent unused variable warning
 
+        # 오류 퍼블리셔 생성
+        self.error_publisher = self.create_publisher(String, '/error', 10)
+
         self.get_logger().info('OrderBeltControl Node has been started.')
 
         # 타이머를 저장하기 위한 변수
@@ -54,6 +57,15 @@ class OrderBeltControl(Node):
 
         # 컨베이어 벨트 상태 관리
         self.belt_sources = set()
+
+        # 마지막 성공적인 통신 시간 초기화
+        self.last_successful_communication_time = self.get_clock().now()
+
+        # 오류가 퍼블리시되었는지 추적
+        self.error_published = False
+
+        # 시리얼 연결 확인을 위한 타이머 설정 (1초마다 체크)
+        self.serial_check_timer = self.create_timer(1.0, self.check_serial_connection)
 
     def belt_callback(self, msg):
         if msg.data:
@@ -104,16 +116,43 @@ class OrderBeltControl(Node):
 
     def send_command_to_belt(self, command_str):
         if self.ser and self.ser.is_open:
-            command = f'{command_str}\n'
-            self.ser.write(command.encode('utf-8'))
-            self.get_logger().info(f'컨베이어를 {command_str}했습니다.')
+            try:
+                command = f'{command_str}\n'
+                self.ser.write(command.encode('utf-8'))
+                self.get_logger().info(f'컨베이어를 {command_str}했습니다.')
+
+                # 마지막 성공적인 통신 시간 업데이트
+                self.last_successful_communication_time = self.get_clock().now()
+
+                # 오류 플래그 초기화
+                if self.error_published:
+                    self.error_published = False
+                    self.get_logger().info('Arduino 연결이 복구되었습니다.')
+
+            except serial.SerialException as e:
+                self.get_logger().warn(f'시리얼 포트 쓰기 오류: {e}')
         else:
             self.get_logger().warn('시리얼 포트가 열려 있지 않습니다.')
+
+    def check_serial_connection(self):
+        now = self.get_clock().now()
+        delta = now - self.last_successful_communication_time
+        delta_seconds = delta.nanoseconds / 1e9  # 나노초를 초로 변환
+        if delta_seconds > 5.0:
+            if not self.error_published:
+                # 오류 메시지 퍼블리시
+                error_msg = String()
+                error_msg.data = 'Arduino has no response'
+                self.error_publisher.publish(error_msg)
+                self.get_logger().error('Arduino has no response')
+                self.error_published = True
 
     def destroy_node(self):
         # 노드를 파괴할 때 타이머를 취소
         if self.state_timer:
             self.state_timer.cancel()
+        if self.serial_check_timer:
+            self.serial_check_timer.cancel()
 
         if self.ser and self.ser.is_open:
             self.ser.close()

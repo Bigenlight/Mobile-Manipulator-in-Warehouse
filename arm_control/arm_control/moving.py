@@ -15,6 +15,20 @@ class MoveUpwardClient(Node):
     def __init__(self):
         super().__init__('move_upward_client')
         
+        # 파라미터 선언 (타겟 좌표 및 상수)
+        self.declare_parameter('target_x', 320)  # 예시 값, 필요에 따라 수정 가능
+        self.declare_parameter('target_y', 240)  # 예시 값, 필요에 따라 수정 가능
+        self.declare_parameter('kx', -0.0003328895)
+        self.declare_parameter('ky', -0.0003328895)
+        self.declare_parameter('fixed_z', 0.11)  # 고정할 Z축 값
+        
+        # 파라미터 값 읽기
+        self.target_x = self.get_parameter('target_x').get_parameter_value().integer_value
+        self.target_y = self.get_parameter('target_y').get_parameter_value().integer_value
+        self.kx = self.get_parameter('kx').get_parameter_value().double_value
+        self.ky = self.get_parameter('ky').get_parameter_value().double_value
+        self.fixed_z = self.get_parameter('fixed_z').get_parameter_value().double_value
+
         # 서비스 클라이언트 생성
         self.cli = self.create_client(SetKinematicsPose, 'goal_task_space_path')
         while not self.cli.wait_for_service(timeout_sec=1.0):
@@ -40,14 +54,6 @@ class MoveUpwardClient(Node):
             self.pixel_coord_callback,
             10)
         self.subscription_pixel  # prevent unused variable warning
-
-        # 타겟 좌표 설정 (사용자가 변경 가능)
-        self.target_x = 320  # 예시 값, 필요에 따라 수정 가능
-        self.target_y = 240  # 예시 값, 필요에 따라 수정 가능
-
-        # 상수 선언
-        self.kx = -0.0003328895
-        self.ky = -0.0003328895
 
         self.get_logger().info('MoveUpwardClient 노드가 시작되었습니다.')
 
@@ -87,9 +93,9 @@ class MoveUpwardClient(Node):
 
         # 새로운 목표 포즈 설정
         self.req.end_effector_name = 'gripper'  # 매니퓰레이터의 엔드 이펙터 이름으로 변경 필요
-        self.req.kinematics_pose.pose.position.x = self.current_pose.position.x + dy
-        self.req.kinematics_pose.pose.position.y = self.current_pose.position.y + dx
-        self.req.kinematics_pose.pose.position.z = self.current_pose.position.z  # z는 동일하게 유지
+        self.req.kinematics_pose.pose.position.x = self.current_pose.position.x + dx
+        self.req.kinematics_pose.pose.position.y = self.current_pose.position.y + dy
+        self.req.kinematics_pose.pose.position.z = self.fixed_z  # Z축을 0.11로 고정
         self.req.kinematics_pose.pose.orientation = self.current_pose.orientation  # 방향 동일하게 유지
         self.req.path_time = 0.5  # 경로 이동 시간 (필요에 따라 조정)
 

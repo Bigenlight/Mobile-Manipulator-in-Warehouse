@@ -6,7 +6,7 @@ from open_manipulator_msgs.srv import SetKinematicsPose, SetJointPosition
 from open_manipulator_msgs.msg import KinematicsPose
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
-from std_msgs.msg import Empty
+from std_msgs.msg import Empty, String  # Imported String
 
 class MoveUpwardClient(Node):
     def __init__(self):
@@ -79,11 +79,18 @@ class MoveUpwardClient(Node):
         self.place_pose3.orientation.z = 0.01580381674006639
         self.place_pose3.orientation.w = 0.98110430384998
 
+        # Initialize the publisher for /load_on_conveyor
+        self.conveyor_pub = self.create_publisher(String, '/load_on_conveyor', 10)
+
     def kinematics_pose_callback(self, msg):
         self.current_pose = msg.pose
+        # Optional: Log current pose for debugging
+        # self.get_logger().debug(f'Updated current_pose: {self.current_pose}')
 
     def joint_states_callback(self, msg):
         self.current_joint_states = msg
+        # Optional: Log current joint states for debugging
+        # self.get_logger().debug(f'Updated joint_states: {self.current_joint_states}')
 
     def catch_callback(self, msg):
         if self.pickup_step == 0 and self.place_step == 0:
@@ -154,7 +161,7 @@ class MoveUpwardClient(Node):
 
     # z를 0.05로 이동 (픽업 완료 후)
     def move_z_up_pickup(self):
-        self.get_logger().info('Pickup: Moving z to 0.05')
+        self.get_logger().info('Pickup: Moving z to 0.15')
         self.timer.cancel()
         self.timer = None
 
@@ -162,7 +169,7 @@ class MoveUpwardClient(Node):
         task_space_req.end_effector_name = 'gripper'
         task_space_req.kinematics_pose.pose.position.x = self.current_pose.position.x
         task_space_req.kinematics_pose.pose.position.y = self.current_pose.position.y
-        task_space_req.kinematics_pose.pose.position.z = 0.05
+        task_space_req.kinematics_pose.pose.position.z = 0.15  # Increased Z value
         task_space_req.kinematics_pose.pose.orientation = self.current_pose.orientation
         task_space_req.path_time = 1.0
 
@@ -173,17 +180,17 @@ class MoveUpwardClient(Node):
     def move_z_up_pickup_callback(self, future):
         try:
             response = future.result()
-            self.get_logger().info('Pickup: Command to move z=0.05 sent successfully.')
-            self.target_z_pickup_up = 0.05
+            self.get_logger().info('Pickup: Command to move z=0.15 sent successfully.')
+            self.target_z_pickup_up = 0.15  # Updated target Z
             self.timer = self.create_timer(0.1, self.check_position_pickup_up)
         except Exception as e:
-            self.get_logger().error(f'Pickup: Failed to send command to move z=0.05: {e}')
+            self.get_logger().error(f'Pickup: Failed to send command to move z=0.15: {e}')
             self.reset_steps()
 
     def check_position_pickup_up(self):
         current_z = self.current_pose.position.z
         self.get_logger().info(f'Pickup: Checking position_pickup_up: current_z={current_z}, target_z={self.target_z_pickup_up}')
-        if abs(current_z - self.target_z_pickup_up) < 0.1:
+        if abs(current_z - self.target_z_pickup_up) < 0.005:
             self.get_logger().info(f'Pickup: Target z={self.target_z_pickup_up} reached.')
             self.timer.cancel()
             self.timer = None
@@ -228,7 +235,7 @@ class MoveUpwardClient(Node):
                 self.open_gripper()
                 # 그리퍼 열기 후 0.5초 대기 (타이머 사용)
                 self.timer = self.create_timer(0.5, self.move_to_place_pose3)
-    
+
     # 그리퍼 열기
     def open_gripper(self):
         self.get_logger().info('Place: Opening the gripper.')
@@ -331,6 +338,12 @@ class MoveUpwardClient(Node):
         self.timer.cancel()
         self.timer = None
         self.reset_steps()
+
+        # Publish 'done' message to /load_on_conveyor
+        done_msg = String()
+        done_msg.data = 'done'
+        self.conveyor_pub.publish(done_msg)
+        self.get_logger().info("Published 'done' to /load_on_conveyor.")
 
     def reset_steps(self):
         self.pickup_step = 0

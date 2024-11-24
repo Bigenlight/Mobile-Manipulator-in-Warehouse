@@ -14,10 +14,10 @@ class RobotCam(Node):
         self.get_logger().info("Initializing RobotCam Node")
 
         # Attempt to open the camera
-        self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)  # Explicitly specify V4L2 backend
+        self.cap = cv2.VideoCapture(1, cv2.CAP_V4L2)  # Explicitly specify V4L2 backend
         if not self.cap.isOpened():
             self.get_logger().error("Cannot open camera at index 0. Trying index 1...")
-            self.cap = cv2.VideoCapture(1, cv2.CAP_V4L2)
+            self.cap = cv2.VideoCapture(4, cv2.CAP_V4L2)
             if not self.cap.isOpened():
                 self.get_logger().fatal("Cannot open camera at index 1. Shutting down node.")
                 rclpy.shutdown()

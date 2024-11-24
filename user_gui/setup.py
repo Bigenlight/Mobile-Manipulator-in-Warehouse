@@ -31,6 +31,7 @@ setup(
             'user_gui = user_gui.user_gui:main',
             'yolo_publisher = user_gui.yolo_publisher:main',
             'image_subscriber = user_gui.image_subscriber:main',
+            'yolo_image = user_gui.yolo_image:main'
         ],
     },
 )

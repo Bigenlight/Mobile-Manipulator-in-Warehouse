@@ -134,7 +134,7 @@ class MoveUpwardClient(Node):
         # 현재 그리퍼 위치와 목표 그리퍼 위치 비교
         gripper_index = self.current_joint_states.name.index('gripper')
         current_gripper_position = self.current_joint_states.position[gripper_index]
-        if abs(current_gripper_position - self.target_gripper_position) < 1:  # 오차 허용 범위
+        if abs(current_gripper_position - self.target_gripper_position) < 0.015:  # 오차 허용 범위
             self.get_logger().info('Gripper closed successfully.')
             self.gripper_closed = True
             self.check_gripper_timer.cancel()

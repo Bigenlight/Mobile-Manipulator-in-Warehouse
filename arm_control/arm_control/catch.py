@@ -49,7 +49,8 @@ class MoveUpwardClient(Node):
         self.goal_joint_angle = [0.0, 0.0, 0.0, 0.0, 0.0]
 
         # 단계 관리 변수
-        self.step = 0
+        self.pickup_step = 0
+        self.place_step = 0
 
         # 대기 타이머 변수 초기화
         self.wait_timer = None
@@ -81,15 +82,15 @@ class MoveUpwardClient(Node):
         self.current_joint_states = msg
 
     def catch_callback(self, msg):
-        if self.step == 0:
+        if self.pickup_step == 0 and self.place_step == 0:
             self.get_logger().info('Received catch signal, starting pickup sequence.')
-            # 시퀀스 시작
-            self.step = 1
+            # 픽업 시퀀스 시작
+            self.pickup_step = 1
             self.move_z_down()
 
     # 픽업 시퀀스 시작: z를 -0.015로 이동
     def move_z_down(self):
-        self.get_logger().info('Moving z to -0.015')
+        self.get_logger().info('Pickup: Moving z to -0.015')
         self.task_space_req.end_effector_name = 'gripper'
         self.task_space_req.kinematics_pose.pose.position.x = self.current_pose.position.x
         self.task_space_req.kinematics_pose.pose.position.y = self.current_pose.position.y
@@ -103,27 +104,27 @@ class MoveUpwardClient(Node):
     def move_z_down_callback(self, future):
         try:
             response = future.result()
-            self.get_logger().info('Command to move z=-0.015 sent successfully.')
+            self.get_logger().info('Pickup: Command to move z=-0.015 sent successfully.')
             # 목표 위치에 도달했는지 확인하기 위해 타이머 시작
             self.target_z_pickup = -0.015
             self.check_position_timer_pickup = self.create_timer(0.1, self.check_position_pickup)
         except Exception as e:
-            self.get_logger().error(f'Failed to send command to move z=-0.015: {e}')
-            self.step = 0  # 시퀀스 초기화
+            self.get_logger().error(f'Pickup: Failed to send command to move z=-0.015: {e}')
+            self.pickup_step = 0  # 시퀀스 초기화
 
     def check_position_pickup(self):
         # 현재 z 위치와 목표 z 위치 비교
         current_z = self.current_pose.position.z
         if abs(current_z - self.target_z_pickup) < 0.005:  # 오차 허용 범위 5mm
-            self.get_logger().info(f'Target z={self.target_z_pickup} reached.')
+            self.get_logger().info(f'Pickup: Target z={self.target_z_pickup} reached.')
             self.check_position_timer_pickup.cancel()
-            if self.step == 1:
-                self.step = 2
+            if self.pickup_step == 1:
+                self.pickup_step = 2
                 self.close_gripper()
 
     # 그리퍼 닫기
     def close_gripper(self):
-        self.get_logger().info('Closing the gripper.')
+        self.get_logger().info('Pickup: Closing the gripper.')
         self.tool_control_req.joint_position.joint_name = ['gripper']
         self.tool_control_req.joint_position.position = [-0.01]  # 그리퍼 완전 닫기
         self.tool_control_req.path_time = 1.0
@@ -134,52 +135,52 @@ class MoveUpwardClient(Node):
     def close_gripper_callback(self, future):
         try:
             response = future.result()
-            self.get_logger().info('Command to close gripper sent successfully.')
+            self.get_logger().info('Pickup: Command to close gripper sent successfully.')
             # 그리퍼를 닫은 후 2초 대기
-            self.wait_timer = self.create_timer(2.0, self.timer_callback_move_z_up)
+            self.wait_timer_pickup = self.create_timer(2.0, self.timer_callback_pickup_move_z_up)
         except Exception as e:
-            self.get_logger().error(f'Failed to send command to close gripper: {e}')
-            self.step = 0  # 시퀀스 초기화
+            self.get_logger().error(f'Pickup: Failed to send command to close gripper: {e}')
+            self.pickup_step = 0  # 시퀀스 초기화
 
-    def timer_callback_move_z_up(self):
-        self.move_z_up()
-        if self.wait_timer is not None:
-            self.wait_timer.cancel()
-            self.wait_timer = None
+    def timer_callback_pickup_move_z_up(self):
+        self.move_z_up_pickup()
+        if self.wait_timer_pickup is not None:
+            self.wait_timer_pickup.cancel()
+            self.wait_timer_pickup = None
 
     # z를 0.15로 이동 (픽업 완료 후)
-    def move_z_up(self):
-        self.get_logger().info('Moving z to 0.07')
+    def move_z_up_pickup(self):
+        self.get_logger().info('Pickup: Moving z to 0.05')
         self.task_space_req.kinematics_pose.pose.position.z = 0.05
         self.task_space_req.path_time = 1.0
 
         future = self.task_space_cli.call_async(self.task_space_req)
-        future.add_done_callback(self.move_z_up_callback)
+        future.add_done_callback(self.move_z_up_pickup_callback)
 
-    def move_z_up_callback(self, future):
+    def move_z_up_pickup_callback(self, future):
         try:
             response = future.result()
-            self.get_logger().info('Command to move z=0.15 sent successfully.')
+            self.get_logger().info('Pickup: Command to move z=0.05 sent successfully.')
             # 목표 위치에 도달했는지 확인하기 위해 타이머 시작
-            self.target_z_pickup_up = 0.15
+            self.target_z_pickup_up = 0.05
             self.check_position_timer_pickup_up = self.create_timer(0.1, self.check_position_pickup_up)
         except Exception as e:
-            self.get_logger().error(f'Failed to send command to move z=0.15: {e}')
-            self.step = 0  # 시퀀스 초기화
+            self.get_logger().error(f'Pickup: Failed to send command to move z=0.05: {e}')
+            self.pickup_step = 0  # 시퀀스 초기화
 
     def check_position_pickup_up(self):
         # 현재 z 위치와 목표 z 위치 비교
         current_z = self.current_pose.position.z
         if abs(current_z - self.target_z_pickup_up) < 0.005:  # 오차 허용 범위 5mm
-            self.get_logger().info(f'Target z={self.target_z_pickup_up} reached.')
+            self.get_logger().info(f'Pickup: Target z={self.target_z_pickup_up} reached.')
             self.check_position_timer_pickup_up.cancel()
-            if self.step == 2:
-                self.step = 3
+            if self.pickup_step == 2:
+                self.pickup_step = 3
                 self.move_to_place_pose1()
 
     # 내려놓기 시퀀스 시작: Pose 1으로 이동
     def move_to_place_pose1(self):
-        self.get_logger().info('Moving to target place pose 1.')
+        self.get_logger().info('Place: Moving to target place pose 1.')
         self.task_space_req.end_effector_name = 'gripper'
         self.task_space_req.kinematics_pose.pose = self.place_pose1
         self.task_space_req.path_time = 2.0  # 이동 시간 설정 (초 단위)
@@ -190,27 +191,27 @@ class MoveUpwardClient(Node):
     def move_to_place_pose1_callback(self, future):
         try:
             response = future.result()
-            self.get_logger().info('Command to move to target place pose 1 sent successfully.')
+            self.get_logger().info('Place: Command to move to target place pose 1 sent successfully.')
             # 목표 위치에 도달했는지 확인하기 위해 타이머 시작
             self.target_z_place1 = self.place_pose1.position.z
             self.check_position_timer_place1 = self.create_timer(0.1, self.check_position_place1)
         except Exception as e:
-            self.get_logger().error(f'Failed to send command to move to target place pose 1: {e}')
-            self.step = 0  # 시퀀스 초기화
+            self.get_logger().error(f'Place: Failed to send command to move to target place pose 1: {e}')
+            self.place_step = 0  # 시퀀스 초기화
 
     def check_position_place1(self):
         # 현재 z 위치와 목표 z 위치 비교
         current_z = self.current_pose.position.z
         if abs(current_z - self.target_z_place1) < 0.005:  # 오차 허용 범위 5mm
-            self.get_logger().info(f'Target place pose 1 reached at z={self.target_z_place1}.')
+            self.get_logger().info(f'Place: Target place pose 1 reached at z={self.target_z_place1}.')
             self.check_position_timer_place1.cancel()
-            if self.step == 3:
-                self.step = 4
+            if self.place_step == 0:
+                self.place_step = 1
                 self.move_to_place_pose2()
 
     # 내려놓기 시퀀스 시작: Pose 2으로 이동
     def move_to_place_pose2(self):
-        self.get_logger().info('Moving to target place pose 2.')
+        self.get_logger().info('Place: Moving to target place pose 2.')
         self.task_space_req.end_effector_name = 'gripper'
         self.task_space_req.kinematics_pose.pose = self.place_pose2
         self.task_space_req.path_time = 2.0  # 이동 시간 설정 (초 단위)
@@ -221,27 +222,27 @@ class MoveUpwardClient(Node):
     def move_to_place_pose2_callback(self, future):
         try:
             response = future.result()
-            self.get_logger().info('Command to move to target place pose 2 sent successfully.')
+            self.get_logger().info('Place: Command to move to target place pose 2 sent successfully.')
             # 목표 위치에 도달했는지 확인하기 위해 타이머 시작
             self.target_z_place2 = self.place_pose2.position.z
             self.check_position_timer_place2 = self.create_timer(0.1, self.check_position_place2)
         except Exception as e:
-            self.get_logger().error(f'Failed to send command to move to target place pose 2: {e}')
-            self.step = 0  # 시퀀스 초기화
+            self.get_logger().error(f'Place: Failed to send command to move to target place pose 2: {e}')
+            self.place_step = 0  # 시퀀스 초기화
 
     def check_position_place2(self):
         # 현재 z 위치와 목표 z 위치 비교
         current_z = self.current_pose.position.z
         if abs(current_z - self.target_z_place2) < 0.005:  # 오차 허용 범위 5mm
-            self.get_logger().info(f'Target place pose 2 reached at z={self.target_z_place2}.')
+            self.get_logger().info(f'Place: Target place pose 2 reached at z={self.target_z_place2}.')
             self.check_position_timer_place2.cancel()
-            if self.step == 4:
-                self.step = 5
+            if self.place_step == 1:
+                self.place_step = 2
                 self.open_gripper()
 
     # 그리퍼 열기
     def open_gripper(self):
-        self.get_logger().info('Opening the gripper.')
+        self.get_logger().info('Place: Opening the gripper.')
         self.tool_control_req.joint_position.joint_name = ['gripper']
         self.tool_control_req.joint_position.position = [0.01]  # 그리퍼 완전 열기
         self.tool_control_req.path_time = 1.0
@@ -252,23 +253,24 @@ class MoveUpwardClient(Node):
     def open_gripper_callback(self, future):
         try:
             response = future.result()
-            self.get_logger().info('Command to open gripper sent successfully.')
+            self.get_logger().info('Place: Command to open gripper sent successfully.')
             # 그리퍼를 연 후 1초 대기
-            self.wait_timer = self.create_timer(1.0, self.timer_callback_sequence_completed)
+            self.wait_timer_place = self.create_timer(1.0, self.timer_callback_sequence_completed)
         except Exception as e:
-            self.get_logger().error(f'Failed to send command to open gripper: {e}')
-            self.step = 0  # 시퀀스 초기화
+            self.get_logger().error(f'Place: Failed to send command to open gripper: {e}')
+            self.place_step = 0  # 시퀀스 초기화
 
     def timer_callback_sequence_completed(self):
         self.sequence_completed()
-        if self.wait_timer is not None:
-            self.wait_timer.cancel()
-            self.wait_timer = None
+        if self.wait_timer_place is not None:
+            self.wait_timer_place.cancel()
+            self.wait_timer_place = None
 
     # 내려놓기 완료 확인
     def sequence_completed(self):
         self.get_logger().info('Box placed successfully. Release sequence completed.')
-        self.step = 0  # 시퀀스 완료
+        self.pickup_step = 0
+        self.place_step = 0  # 시퀀스 초기화
 
 def main(args=None):
     rclpy.init(args=args)

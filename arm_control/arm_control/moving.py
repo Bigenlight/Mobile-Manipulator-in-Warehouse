@@ -6,10 +6,8 @@ from open_manipulator_msgs.srv import SetKinematicsPose
 from open_manipulator_msgs.msg import KinematicsPose
 from geometry_msgs.msg import Pose, Quaternion
 from std_msgs.msg import String, Empty
-from threading import Event
+from threading import Event, Timer
 import re
-import json
-from datetime import datetime
 
 class MoveUpwardClient(Node):
     def __init__(self):
@@ -72,7 +70,7 @@ class MoveUpwardClient(Node):
         # Publisher to 'catch' topic
         self.catch_publisher = self.create_publisher(Empty, 'catch', 10)
 
-        # Timer for 'catch' topic
+        # Timer for 'catch' topic and restart
         self.timer = None
 
         # Tracking flags
@@ -89,8 +87,8 @@ class MoveUpwardClient(Node):
 
     def pixel_coord_callback(self, msg):
         """/pixel_coord topic callback to receive pixel coordinates and update manipulator position."""
-        if self.done:
-            # Target already reached, ignore further processing
+        if not self.tracking_active:
+            # Tracking is inactive, ignore further processing
             return
 
         # Extract p_x and p_y from the message
@@ -114,19 +112,21 @@ class MoveUpwardClient(Node):
         if distance < 10:
             self.get_logger().info('Target is within 10 pixels. Stopping tracking.')
 
-            self.done = True  # Set done flag to True
-
             # Publish 'done' to 'target_box' topic
             done_msg = String()
             done_msg.data = 'done'
             self.target_publisher.publish(done_msg)
             self.get_logger().info("Published 'done' to 'target_box' topic.")
 
-            # Start the catch timer
-            self.start_catch_timer()
+            # Publish to 'catch' topic
+            self.publish_catch()
 
             # Stop tracking
             self.tracking_active = False
+
+            # Start timer to restart tracking after 5 seconds
+            self.get_logger().info('Starting timer to restart tracking in 5 seconds.')
+            Timer(2.0, self.restart_tracking).start()
 
             return  # Exit the callback
 
@@ -188,16 +188,22 @@ class MoveUpwardClient(Node):
             else:
                 self.get_logger().error('Failed to move manipulator.')
 
-    def start_catch_timer(self):
-        if self.timer is None:
-            self.timer = self.create_timer(0.1, self.timer_callback)
-
-    def timer_callback(self):
+    def publish_catch(self):
+        """Publish to the 'catch' topic."""
         msg = Empty()
         self.catch_publisher.publish(msg)
         self.get_logger().info('Published to catch topic.')
-        self.timer.cancel()  # Stop the timer after publishing once
-        self.timer = None
+
+    def restart_tracking(self):
+        """Restart tracking after the delay."""
+        self.get_logger().info('Restarting tracking.')
+        # Publish the target color to 'target_box' topic to resume tracking
+        if self.target_color is not None:
+            self.tracking_active = True
+            resume_msg = String()
+            resume_msg.data = self.target_color
+            self.target_publisher.publish(resume_msg)
+            self.get_logger().info(f"Published '{self.target_color}' to 'target_box' topic to resume tracking.")
 
     def destroy_node(self):
         """Clean up resources when the node is destroyed."""

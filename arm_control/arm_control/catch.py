@@ -53,13 +53,13 @@ class MoveUpwardClient(Node):
 
         # 내려놓기 위한 목표 위치 설정 (절대 좌표값)
         self.place_pose1 = Pose()
-        self.place_pose1.position.x = 0.013114313918879605
-        self.place_pose1.position.y = 0.36321287339041936
-        self.place_pose1.position.z = 0.025007863577571482
-        self.place_pose1.orientation.x = -0.15310465745342147
-        self.place_pose1.orientation.y = 0.15357509329946967
-        self.place_pose1.orientation.z = 0.6892205764413497
-        self.place_pose1.orientation.w = 0.6913383047350865
+        self.place_pose1.position.x = -0.0036015123868615422
+        self.place_pose1.position.y = 0.3630120976801982
+        self.place_pose1.position.z = 0.036031889660761436
+        self.place_pose1.orientation.x = -0.1819025461291056
+        self.place_pose1.orientation.y = 0.17425266819767304
+        self.place_pose1.orientation.z = 0.6988423393796847
+        self.place_pose1.orientation.w = 0.6694526540600686
 
         self.place_pose2 = Pose()
         self.place_pose2.position.x = 0.16120536006233618
@@ -72,13 +72,13 @@ class MoveUpwardClient(Node):
 
         # 새로 추가된 pose3 정의
         self.place_pose3 = Pose()
-        self.place_pose3.position.x = 0.24365265636623842
-        self.place_pose3.position.y = 0.007464948005071252
-        self.place_pose3.position.z = 0.1121231145123773
-        self.place_pose3.orientation.x = -0.003105788896840778
-        self.place_pose3.orientation.y = 0.19280803515108144
-        self.place_pose3.orientation.z = 0.01580381674006639
-        self.place_pose3.orientation.w = 0.98110430384998
+        self.place_pose3.position.x = -0.007045009130165597
+        self.place_pose3.position.y = 0.32635082495913903
+        self.place_pose3.position.z = 0.09935360852137144
+        self.place_pose3.orientation.x = -0.1810731008940189
+        self.place_pose3.orientation.y = 0.1708142011937776
+        self.place_pose3.orientation.z = 0.7045152299337827
+        self.place_pose3.orientation.w = 0.6646001290960644
 
         # Initialize the publisher for /load_on_conveyor
         self.conveyor_pub = self.create_publisher(String, '/load_on_conveyor', 10)

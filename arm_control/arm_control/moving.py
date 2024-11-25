@@ -19,6 +19,7 @@ class MoveUpwardClient(Node):
         self.declare_parameter('kx', -0.0003328895)
         self.declare_parameter('ky', -0.0003328895)
         self.declare_parameter('fixed_z', 0.06)  # Fixed Z-axis value
+        self.declare_parameter('target_color', 'red')  # New parameter for target color
         
         # Read parameter values
         self.target_x = self.get_parameter('target_x').get_parameter_value().double_value
@@ -26,8 +27,9 @@ class MoveUpwardClient(Node):
         self.kx = self.get_parameter('kx').get_parameter_value().double_value
         self.ky = self.get_parameter('ky').get_parameter_value().double_value
         self.fixed_z = self.get_parameter('fixed_z').get_parameter_value().double_value
+        self.target_color = self.get_parameter('target_color').get_parameter_value().string_value  # Read target color
 
-        self.get_logger().info(f"Parameters loaded: target_x={self.target_x}, target_y={self.target_y}, kx={self.kx}, ky={self.ky}, fixed_z={self.fixed_z}")
+        self.get_logger().info(f"Parameters loaded: target_x={self.target_x}, target_y={self.target_y}, kx={self.kx}, ky={self.ky}, fixed_z={self.fixed_z}, target_color='{self.target_color}'")
 
         # Define fixed orientation
         self.fixed_orientation = Quaternion()
@@ -64,20 +66,27 @@ class MoveUpwardClient(Node):
             10)
         self.subscription_pixel  # prevent unused variable warning
 
-        # Publisher to 'target_box' to send 'done'
+        # Publisher to 'target_box' to send 'done' or target color
         self.target_publisher = self.create_publisher(String, 'target_box', 10)
 
         # Publisher to 'catch' topic
         self.catch_publisher = self.create_publisher(Empty, 'catch', 10)
 
-        # Timer for 'catch' topic and restart
-        self.timer = None
-
         # Tracking flags
         self.tracking_active = True  # Initially tracking is active
-        self.done = False  # Indicates whether the target is reached
 
         self.get_logger().info('MoveUpwardClient node has been started.')
+
+        # Start tracking by publishing the target color
+        self.start_tracking()
+
+    def start_tracking(self):
+        """Start tracking by publishing the target color."""
+        self.tracking_active = True
+        resume_msg = String()
+        resume_msg.data = self.target_color
+        self.target_publisher.publish(resume_msg)
+        self.get_logger().info(f"Published '{self.target_color}' to 'target_box' topic to start tracking.")
 
     def kinematics_pose_callback(self, msg):
         """Update the current pose of the manipulator."""
@@ -124,8 +133,8 @@ class MoveUpwardClient(Node):
             # Stop tracking
             self.tracking_active = False
 
-            # Start timer to restart tracking after 5 seconds
-            self.get_logger().info('Starting timer to restart tracking in 5 seconds.')
+            # Start timer to restart tracking after 2 seconds
+            self.get_logger().info('Starting timer to restart tracking in 2 seconds.')
             Timer(2.0, self.restart_tracking).start()
 
             return  # Exit the callback
@@ -197,13 +206,12 @@ class MoveUpwardClient(Node):
     def restart_tracking(self):
         """Restart tracking after the delay."""
         self.get_logger().info('Restarting tracking.')
+        self.tracking_active = True
         # Publish the target color to 'target_box' topic to resume tracking
-        if self.target_color is not None:
-            self.tracking_active = True
-            resume_msg = String()
-            resume_msg.data = self.target_color
-            self.target_publisher.publish(resume_msg)
-            self.get_logger().info(f"Published '{self.target_color}' to 'target_box' topic to resume tracking.")
+        resume_msg = String()
+        resume_msg.data = self.target_color
+        self.target_publisher.publish(resume_msg)
+        self.get_logger().info(f"Published '{self.target_color}' to 'target_box' topic to resume tracking.")
 
     def destroy_node(self):
         """Clean up resources when the node is destroyed."""

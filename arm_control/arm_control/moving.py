@@ -5,8 +5,8 @@ from rclpy.node import Node
 from open_manipulator_msgs.srv import SetKinematicsPose
 from open_manipulator_msgs.msg import KinematicsPose
 from geometry_msgs.msg import Pose, Quaternion
-from std_msgs.msg import String, Empty
-from threading import Event, Timer
+from std_msgs.msg import Empty
+from threading import Event
 import re
 
 class MoveUpwardClient(Node):
@@ -19,24 +19,24 @@ class MoveUpwardClient(Node):
         self.declare_parameter('kx', -0.0003328895)
         self.declare_parameter('ky', -0.0003328895)
         self.declare_parameter('fixed_z', 0.06)  # Fixed Z-axis value
-        self.declare_parameter('target_color', 'red')  # New parameter for target color
         
         # Read parameter values
-        self.target_x = self.get_parameter('target_x').get_parameter_value().double_value
-        self.target_y = self.get_parameter('target_y').get_parameter_value().double_value
-        self.kx = self.get_parameter('kx').get_parameter_value().double_value
-        self.ky = self.get_parameter('ky').get_parameter_value().double_value
-        self.fixed_z = self.get_parameter('fixed_z').get_parameter_value().double_value
-        self.target_color = self.get_parameter('target_color').get_parameter_value().string_value  # Read target color
+        self.target_x = self.get_parameter('target_x').value
+        self.target_y = self.get_parameter('target_y').value
+        self.kx = self.get_parameter('kx').value
+        self.ky = self.get_parameter('ky').value
+        self.fixed_z = self.get_parameter('fixed_z').value
 
-        self.get_logger().info(f"Parameters loaded: target_x={self.target_x}, target_y={self.target_y}, kx={self.kx}, ky={self.ky}, fixed_z={self.fixed_z}, target_color='{self.target_color}'")
+        self.get_logger().info(f"Parameters loaded: target_x={self.target_x}, target_y={self.target_y}, "
+                               f"kx={self.kx}, ky={self.ky}, fixed_z={self.fixed_z}")
 
         # Define fixed orientation
-        self.fixed_orientation = Quaternion()
-        self.fixed_orientation.x = 0.0
-        self.fixed_orientation.y = 0.7189371190367781
-        self.fixed_orientation.z = 0.0
-        self.fixed_orientation.w = 0.6950751174305533
+        self.fixed_orientation = Quaternion(
+            x=0.0,
+            y=0.7189371190367781,
+            z=0.0,
+            w=0.6950751174305533
+        )
 
         self.get_logger().info(f"Fixed orientation set to: {self.fixed_orientation}")
 
@@ -56,46 +56,34 @@ class MoveUpwardClient(Node):
             'kinematics_pose',
             self.kinematics_pose_callback,
             10)
-        self.subscription_pose  # prevent unused variable warning
 
         # Subscriber for pixel coordinates
         self.subscription_pixel = self.create_subscription(
-            String,
+            Empty,  # Assuming the pixel coordinates are published as a String message
             '/pixel_coord',
             self.pixel_coord_callback,
             10)
-        self.subscription_pixel  # prevent unused variable warning
-
-        # Publisher to 'target_box' to send 'done' or target color
-        self.target_publisher = self.create_publisher(String, 'target_box', 10)
 
         # Publisher to 'catch' topic
         self.catch_publisher = self.create_publisher(Empty, 'catch', 10)
 
-        # Tracking flags
+        # Tracking flag
         self.tracking_active = True  # Initially tracking is active
 
         self.get_logger().info('MoveUpwardClient node has been started.')
 
-        # Start tracking by publishing the target color
-        self.start_tracking()
-
-    def start_tracking(self):
-        """Start tracking by publishing the target color."""
-        self.tracking_active = True
-        resume_msg = String()
-        resume_msg.data = self.target_color
-        self.target_publisher.publish(resume_msg)
-        self.get_logger().info(f"Published '{self.target_color}' to 'target_box' topic to start tracking.")
+        # ROS timer for restarting tracking
+        self.restart_timer = None
 
     def kinematics_pose_callback(self, msg):
         """Update the current pose of the manipulator."""
         self.current_pose = msg.pose
         self.pose_received.set()
-        self.get_logger().debug(f'Current pose received: x={self.current_pose.position.x}, y={self.current_pose.position.y}, z={self.current_pose.position.z}')
+        self.get_logger().debug(f'Current pose received: x={self.current_pose.position.x}, '
+                                f'y={self.current_pose.position.y}, z={self.current_pose.position.z}')
 
     def pixel_coord_callback(self, msg):
-        """/pixel_coord topic callback to receive pixel coordinates and update manipulator position."""
+        """Callback to receive pixel coordinates and update manipulator position."""
         if not self.tracking_active:
             # Tracking is inactive, ignore further processing
             return
@@ -121,22 +109,15 @@ class MoveUpwardClient(Node):
         if distance < 10:
             self.get_logger().info('Target is within 10 pixels. Stopping tracking.')
 
-            # Publish 'done' to 'target_box' topic
-            done_msg = String()
-            done_msg.data = 'done'
-            self.target_publisher.publish(done_msg)
-            self.get_logger().info("Published 'done' to 'target_box' topic.")
-
             # Publish to 'catch' topic
             self.publish_catch()
 
             # Stop tracking
             self.tracking_active = False
 
-            # Start timer to restart tracking after 2 seconds
-            self.get_logger().info('Starting timer to restart tracking in 2 seconds.')
-            Timer(2.0, self.restart_tracking).start()
-
+            # Start timer to restart tracking after 5 seconds
+            self.get_logger().info('Starting timer to restart tracking in 5 seconds.')
+            self.restart_timer = self.create_timer(5.0, self.restart_tracking)
             return  # Exit the callback
 
         # Continue tracking and moving towards the target
@@ -161,7 +142,9 @@ class MoveUpwardClient(Node):
         self.req.kinematics_pose.pose.orientation = self.fixed_orientation  # Fixed orientation
         self.req.path_time = 0.5  # Path movement time (adjust as needed)
 
-        self.get_logger().info(f'Target pose set: x={self.req.kinematics_pose.pose.position.x:.4f}, y={self.req.kinematics_pose.pose.position.y:.4f}, z={self.req.kinematics_pose.pose.position.z:.4f}')
+        self.get_logger().info(f'Target pose set: x={self.req.kinematics_pose.pose.position.x:.4f}, '
+                               f'y={self.req.kinematics_pose.pose.position.y:.4f}, '
+                               f'z={self.req.kinematics_pose.pose.position.z:.4f}')
         self.get_logger().info(f'Fixed orientation applied: {self.req.kinematics_pose.pose.orientation}')
 
         # Send service request asynchronously
@@ -207,11 +190,10 @@ class MoveUpwardClient(Node):
         """Restart tracking after the delay."""
         self.get_logger().info('Restarting tracking.')
         self.tracking_active = True
-        # Publish the target color to 'target_box' topic to resume tracking
-        resume_msg = String()
-        resume_msg.data = self.target_color
-        self.target_publisher.publish(resume_msg)
-        self.get_logger().info(f"Published '{self.target_color}' to 'target_box' topic to resume tracking.")
+        # Destroy the timer after it's called once
+        if self.restart_timer is not None:
+            self.restart_timer.cancel()
+            self.restart_timer = None
 
     def destroy_node(self):
         """Clean up resources when the node is destroyed."""

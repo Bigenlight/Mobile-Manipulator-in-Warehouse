@@ -115,9 +115,9 @@ class MoveUpwardClient(Node):
             # Stop tracking
             self.tracking_active = False
 
-            # Start timer to restart tracking after 5 seconds
+            # Start timer to restart tracking after 2 seconds
             self.get_logger().info('Starting timer to restart tracking in 5 seconds.')
-            self.restart_timer = self.create_timer(5.0, self.restart_tracking)
+            self.restart_timer = self.create_timer(2.0, self.restart_tracking)
             return  # Exit the callback
 
         # Continue tracking and moving towards the target

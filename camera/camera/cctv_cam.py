@@ -20,7 +20,7 @@ class CctvCam(Node):
             self.cap = cv2.VideoCapture(1, cv2.CAP_V4L2)
             if not self.cap.isOpened():
                 self.get_logger().error("Cannot open camera at index 2. Trying index 3...")
-                self.cap = cv2.VideoCapture(2, cv2.CAP_V4L2)
+                self.cap = cv2.VideoCapture(3, cv2.CAP_V4L2)
                 if not self.cap.isOpened():
                     self.get_logger().fatal("Cannot open camera at any index. Shutting down node.")
                     rclpy.shutdown()

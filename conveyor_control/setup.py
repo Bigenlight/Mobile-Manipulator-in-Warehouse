@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'order_belt_control = conveyor_control.order_belt_control:main',
+            #'order_belt_control_step = conveyor_control.order_belt_control_step:main',
         ],
     },
 )

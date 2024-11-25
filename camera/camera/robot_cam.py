@@ -19,7 +19,7 @@ class RobotCam(Node):
             self.get_logger().error("Cannot open camera at index 0. Trying index 1...")
             self.cap = cv2.VideoCapture(1, cv2.CAP_V4L2)
             if not self.cap.isOpened():
-                self.get_logger().error("Cannot open camera at index 0. Trying index 1...")
+                self.get_logger().error("Cannot open camera at index 1. Trying index 2...")
                 self.cap = cv2.VideoCapture(2, cv2.CAP_V4L2)
                 if not self.cap.isOpened():
                     self.get_logger().fatal("Cannot open camera at index 1. Shutting down node.")

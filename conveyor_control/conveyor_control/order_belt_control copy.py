@@ -6,7 +6,7 @@ import time
 
 class OrderBeltControl(Node):
     def __init__(self):
-        super().__init__('order_belt_control')
+        super().__init__('order_belt_control_step')
 
         # 시리얼 포트 설정 (포트명과 보드레이트는 환경에 맞게 수정)
         self.serial_port = '/dev/arduino_trailer'  # 예: /dev/ttyACM0, Windows의 경우 'COM3' 등
@@ -160,13 +160,13 @@ class OrderBeltControl(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    order_belt_control = OrderBeltControl()
+    order_belt_control_step = OrderBeltControl()
     try:
-        rclpy.spin(order_belt_control)
+        rclpy.spin(order_belt_control_step)
     except KeyboardInterrupt:
         pass
     finally:
-        order_belt_control.destroy_node()
+        order_belt_control_step.destroy_node()
         rclpy.shutdown()
 
 if __name__ == '__main__':

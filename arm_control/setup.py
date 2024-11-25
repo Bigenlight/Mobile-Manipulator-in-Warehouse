@@ -28,6 +28,7 @@ setup(
             'catch = arm_control.catch:main',
             'test_catch = arm_control.test_catch:main',
             'order_manager = arm_control.order_manager:main',
+            'move_to_pose2 = arm_control.move_to_pose2:main',  # Add this line
         ],
     },
 )

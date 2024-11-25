@@ -37,6 +37,10 @@ class ImageSubscriber(Node):
         # Publisher for 'count_box' topic (as String)
         self.count_publisher = self.create_publisher(String, 'count_box', 10)
 
+        # **Add the missing publisher for '/image_topic'**
+        # Publisher for '/image_topic' (CompressedImage)
+        self.image_publisher = self.create_publisher(CompressedImage, '/image_topic', 10)
+
         self.bridge = CvBridge()
         self.latest_ros_frame = None
         self.lock_image = threading.Lock()

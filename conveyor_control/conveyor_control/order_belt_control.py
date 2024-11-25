@@ -138,7 +138,7 @@ class OrderBeltControl(Node):
         now = self.get_clock().now()
         delta = now - self.last_successful_communication_time
         delta_seconds = delta.nanoseconds / 1e9  # 나노초를 초로 변환
-        if delta_seconds > 5.0:
+        if delta_seconds > 20.0:
             if not self.error_published:
                 # 오류 메시지 퍼블리시
                 error_msg = String()

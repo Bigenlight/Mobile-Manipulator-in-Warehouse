@@ -91,6 +91,7 @@ class ImageSubscriber(Node):
             self.publish_current_image()
         elif color == 'done':
             self.tracking_active = False
+            self.target_color = None  # Reset target color
             self.get_logger().info("Stopped tracking boxes.")
             self.publish_current_image()
         else:
@@ -178,7 +179,7 @@ class ImageSubscriber(Node):
                                     blue_count += 1
 
                                 # Check if tracking is active and box matches target color
-                                if self.tracking_active and class_name.lower() == self.target_color:
+                                if self.tracking_active and self.target_color == class_name.lower():
                                     if track_id != -1 and track_id < min_track_id:
                                         min_track_id = track_id
                                         selected_box = {'center_x': center_x, 'center_y': center_y}
@@ -190,17 +191,19 @@ class ImageSubscriber(Node):
                         self.get_logger().info(f"Published counts: {count_msg.data}")
 
                         # Publish the center coordinates if tracking is active
-                        if self.tracking_active and selected_box is not None:
-                            coord_str = f"({selected_box['center_x']:.1f},{selected_box['center_y']:.1f})"
-                            pixel_msg = String()
-                            pixel_msg.data = coord_str
+                        if self.tracking_active:
+                            if selected_box is not None:
+                                coord_str = f"({selected_box['center_x']:.1f},{selected_box['center_y']:.1f})"
+                                pixel_msg = String()
+                                pixel_msg.data = coord_str
 
-                            self.pixel_publisher.publish(pixel_msg)
-                            self.get_logger().info(
-                                f"Published pixel coordinates: {pixel_msg.data}"
-                            )
-                        elif self.tracking_active:
-                            self.get_logger().warning(f"Could not find a '{self.target_color}' box.")
+                                self.pixel_publisher.publish(pixel_msg)
+                                self.get_logger().info(
+                                    f"Published pixel coordinates: {pixel_msg.data}"
+                                )
+                            else:
+                                self.get_logger().warning(f"Could not find a '{self.target_color}' box.")
+                        # Else, do not publish pixel coordinates or log warnings
 
                         # Display the image
                         cv2.imshow('YOLOv8 Detection', frame)
